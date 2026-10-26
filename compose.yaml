@@ -1,0 +1,23 @@
+# Development only: PostgreSQL for local work. Production lives in deploy/compose.yaml.
+name: yapspace-dev
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=200ms"]
+    environment:
+      POSTGRES_USER: yapspace
+      POSTGRES_PASSWORD: yapspace
+      POSTGRES_DB: yapspace
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yapspace -d yapspace"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pgdata: {}

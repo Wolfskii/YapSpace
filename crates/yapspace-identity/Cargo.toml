@@ -3,7 +3,6 @@ name = "yapspace-identity"
 description = "Pure URL identity rules for YapSpace (normalization, site adapters, identity keys)"
 edition.workspace = true
 version.workspace = true
-license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 

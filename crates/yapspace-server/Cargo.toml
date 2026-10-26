@@ -3,7 +3,6 @@ name = "yapspace-server"
 description = "YapSpace backend: REST API, realtime hub, migrations and admin CLI"
 edition.workspace = true
 version.workspace = true
-license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
@@ -16,7 +15,7 @@ name = "yapspace"
 path = "src/main.rs"
 
 [dependencies]
-yapspace-identity = { path = "../yapspace-identity" }
+yapspace-identity = { path = "../yapspace-identity", version = "0.1.0" }
 tokio = { version = "1", features = ["full"] }
 axum = { version = "0.8", features = ["ws", "macros"] }
 tower = "0.5"

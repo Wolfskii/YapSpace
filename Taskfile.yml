@@ -1,0 +1,77 @@
+version: '3'
+
+# Run `task --list` to see all tasks. Tasks for parts that don't exist yet are added by the task that creates them.
+
+dotenv: ['.env']
+
+tasks:
+  default:
+    cmds: [task --list]
+    silent: true
+
+  setup:
+    desc: Install dev tools (sqlx-cli, cargo-deny)
+    cmds:
+      - cargo install sqlx-cli --no-default-features --features postgres
+      - cargo install cargo-deny --locked
+
+  dev:db:up:
+    desc: Start dev Postgres and wait until healthy
+    cmds: [docker compose up -d --wait postgres]
+
+  dev:db:down:
+    desc: Stop dev Postgres
+    cmds: [docker compose down]
+
+  dev:db:reset:
+    desc: Drop and recreate the dev database, then migrate
+    cmds:
+      - docker compose down -v
+      - docker compose up -d --wait postgres
+      - task: db:migrate
+
+  dev:db:psql:
+    desc: Open a psql shell in the dev database
+    cmds: [docker compose exec postgres psql -U yapspace yapspace]
+    interactive: true
+
+  db:migrate:
+    desc: Apply database migrations
+    cmds: [cargo run -q -p yapspace-server -- migrate]
+
+  db:prepare:
+    desc: Refresh the sqlx offline query cache (.sqlx/)
+    cmds: [cargo sqlx prepare --workspace -- --all-targets]
+
+  api:run:
+    desc: Run the API server
+    cmds: [cargo run -p yapspace-server -- serve]
+
+  api:test:
+    desc: Run Rust tests
+    cmds: [cargo test --workspace]
+
+  api:lint:
+    desc: Check formatting and run clippy (warnings are errors)
+    cmds:
+      - cargo fmt --all --check
+      - cargo clippy --workspace --all-targets -- -D warnings
+
+  api:deny:
+    desc: Check dependency advisories, licenses and sources
+    cmds: [cargo deny check]
+
+  api:openapi:
+    desc: Regenerate docs/api/openapi.json
+    cmds: [cargo run -q -p yapspace-server -- openapi --out docs/api/openapi.json]
+
+  docker:build:
+    desc: Build the production image locally (tag yapspace:dev)
+    cmds: [docker build -t yapspace:dev .]
+
+  check:
+    desc: Everything CI runs (gate before marking a task DONE)
+    cmds:
+      - task: api:lint
+      - task: api:test
+      - task: api:deny
