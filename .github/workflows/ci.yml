@@ -1,0 +1,105 @@
+name: ci
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: rust (fmt, clippy, migrations, tests)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: yapspace
+          POSTGRES_PASSWORD: yapspace
+          POSTGRES_DB: yapspace
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U yapspace -d yapspace"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://yapspace:yapspace@127.0.0.1:5432/yapspace
+      YAPSPACE_DATABASE_URL: postgres://yapspace:yapspace@127.0.0.1:5432/yapspace
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy (warnings are errors)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Migrate an empty database from zero
+        run: cargo run -q -p yapspace-server -- migrate
+      - name: Tests
+        run: cargo test --workspace
+
+  deny:
+    name: cargo-deny (advisories, licenses, sources)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+
+  docker:
+    name: docker image and compose smoke test
+    runs-on: ubuntu-latest
+    needs: [rust]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build --build-arg GIT_SHA=${{ github.sha }} -t yapspace:ci .
+      - name: Compose smoke test
+        run: |
+          docker compose -f compose.ci.yaml up -d --wait api
+          curl -fsS http://127.0.0.1:8080/readyz
+          curl -fsS http://127.0.0.1:8080/healthz
+      - name: Image scan (fails on fixable CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: yapspace:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose -f compose.ci.yaml logs --no-color
+      - name: Tear down
+        if: always()
+        run: docker compose -f compose.ci.yaml down -v
+
+  guards:
+    name: repository guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No raw HTML injection in Svelte
+        run: |
+          if [ -d extension/src ] && grep -rn "{@html" extension/src; then
+            echo "{@html} is banned (docs/architecture/extension.md)"; exit 1
+          fi
+      - name: No AI attribution in new commits
+        if: github.event_name == 'pull_request'
+        run: |
+          if git log --format=%B "${{ github.event.pull_request.base.sha }}..HEAD" \
+              | grep -qiE 'co-authored-by|generated with'; then
+            echo "Commit messages must not contain AI attribution lines (AGENTS.md)"; exit 1
+          fi

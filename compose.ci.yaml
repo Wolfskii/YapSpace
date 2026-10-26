@@ -1,0 +1,45 @@
+# CI smoke test: PostgreSQL, one-shot migrate, then the API built from this repo (image yapspace:ci).
+name: yapspace-ci
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: yapspace
+      POSTGRES_PASSWORD: yapspace
+      POSTGRES_DB: yapspace
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yapspace -d yapspace"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    image: yapspace:ci
+    command: ["migrate"]
+    environment:
+      YAPSPACE_DATABASE_URL: postgres://yapspace:yapspace@postgres:5432/yapspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    image: yapspace:ci
+    command: ["serve"]
+    environment:
+      YAPSPACE_ENV: prod
+      YAPSPACE_DATABASE_URL: postgres://yapspace:yapspace@postgres:5432/yapspace
+      YAPSPACE_BIND_ADDR: 0.0.0.0:8080
+      YAPSPACE_METRICS_ADDR: 0.0.0.0:9090
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/app/yapspace", "healthcheck"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 3s

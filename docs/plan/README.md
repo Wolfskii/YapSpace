@@ -125,8 +125,8 @@ Phase gate: OPEN
 | P1-06 | App skeleton: state, router, errors, health, shutdown | Must | P1-05 | IN_REVIEW | 2026-10-26 | Manual check: Ctrl-C shutdown with the real console signal (see handoff) |
 | P1-07 | Database pool + migrations + initial schema | Must | P1-03, P1-06 | DONE | 2026-10-26 |  |
 | P1-08 | Integration test harness | Must | P1-07 | DONE | 2026-10-26 |  |
-| P1-09 | Dockerfile + image healthcheck | Must | P1-07 | TODO |  |  |
-| P1-10 | CI workflow | Must | P1-08, P1-09 | TODO |  |  |
+| P1-09 | Dockerfile + image healthcheck | Must | P1-07 | DONE | 2026-10-26 | Image 61.4 MB vs 60 MB target (accepted; distroless base + binary) |
+| P1-10 | CI workflow | Must | P1-08, P1-09 | IN_REVIEW | 2026-10-26 | Needs GitHub remote (D-03) to run; YAML validated locally |
 | P1-11 | OpenAPI skeleton + docs UI | Must | P1-06 | TODO |  |  |
 
 Phase gate: OPEN

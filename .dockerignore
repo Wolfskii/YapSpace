@@ -1,0 +1,18 @@
+# Build output and local state
+target/
+**/target/
+.git/
+.github/
+docs/
+extension/
+loadtest/
+deploy/secrets/
+.env
+.env.*
+!.env.example
+*.log
+
+# Editor and tool folders
+.claude/
+.vscode/
+.idea/

@@ -56,3 +56,12 @@ Newest entry at the bottom. Template:
 - Did: `tests/common/mod.rs` (`spawn_app(pool)` binds 127.0.0.1:0, returns TestApp with http client and `stop()`), `tests/health.rs` (7 tests), `serve_on(state, listener)` split from `serve()` so tests use an ephemeral port without installing signal handlers. README documents DATABASE_URL for sqlx::test.
 - Checks: `task check` exit 0 (fmt, clippy -D warnings, 30 tests, cargo-deny).
 - Next: P1-09 (Dockerfile). Still open from earlier: the `.sqlx/` offline cache is created in P2 when real queries exist; `cargo install sqlx-cli` must run before `task db:prepare` works.
+
+## 2026-10-26 · P1-09 · TODO → DONE
+- Did: `Dockerfile` (cargo-chef, rust:1.98-slim-trixie builder, gcr.io/distroless/cc-debian13:nonroot runtime, HEALTHCHECK = `yapspace healthcheck`), `.dockerignore`.
+- Checks: `docker build` ok; image 61.4 MB (target was < 60 MB: accepted deviation); user nonroot; `--help` ok; container /readyz 200 against the dev DB; in-container `healthcheck` exit 0 (Git Bash needs `MSYS_NO_PATHCONV=1` for `docker exec` with /app paths).
+- Next: P1-10 (CI) is written. It needs a GitHub remote to run (D-03). P1-11 waits on P1-06 review.
+
+## 2026-10-26 · P1-10 · TODO → IN_REVIEW
+- Did: `.github/workflows/ci.yml` (rust: fmt, clippy, migrate from zero, tests with a postgres 18 service; deny; docker: build + compose smoke + Trivy; guards: no {@html}, no AI attribution in PR commits), `compose.ci.yaml`, `.github/dependabot.yml`.
+- Checks: YAML parses. Not run on GitHub yet. Deferred on purpose: the OpenAPI drift check (added with P1-11).
