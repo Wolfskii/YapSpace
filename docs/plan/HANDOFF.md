@@ -75,3 +75,8 @@ Newest entry at the bottom. Template:
 - Checks: spec contains /healthz and /readyz; regenerating gives byte-identical output; dev: /openapi.json 200 and /docs 200; prod: both 404; tests and clippy pass.
 - Not done: Redocly lint. The command was denied by the permission checker (it runs an external npm package). Run `npx @redocly/cli lint docs/api/openapi.json` yourself and set P1-11 to DONE if it passes.
 - Next: P1-10 (needs the GitHub remote, D-03).
+
+## 2026-10-26 · P1-10 · IN_REVIEW → DONE
+- Did: remote set to https://github.com/Wolfskii/YapSpace.git. Repo kept PUBLIC by user choice. Fixed two CI errors: trivy-action tag needed a v prefix, and the release it pinned depended on a missing setup-trivy tag. Now pinned to aquasecurity/trivy-action@v0.36.0.
+- Checks: GitHub CI green on all four jobs (rust, cargo-deny, guards, docker smoke test + Trivy).
+- Still open: P1-11 (Redocly lint, run by the user). Phase 1 gate waits on it.
