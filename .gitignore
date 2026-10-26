@@ -1,0 +1,21 @@
+# Rust
+target/
+
+# Node / extension
+node_modules/
+extension/.output/
+extension/.wxt/
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+!*.env.example
+deploy/secrets/
+deploy/.env
+deploy/backup.env
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
