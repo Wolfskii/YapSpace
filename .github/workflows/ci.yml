@@ -35,7 +35,7 @@ jobs:
       YAPSPACE_DATABASE_URL: postgres://yapspace:yapspace@127.0.0.1:5432/yapspace
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.98
+      - uses: dtolnay/rust-toolchain@1.120
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
