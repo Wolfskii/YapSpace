@@ -75,7 +75,7 @@ jobs:
           curl -fsS http://127.0.0.1:8080/readyz
           curl -fsS http://127.0.0.1:8080/healthz
       - name: Image scan (fails on fixable CRITICAL/HIGH)
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: yapspace:ci
           severity: CRITICAL,HIGH
