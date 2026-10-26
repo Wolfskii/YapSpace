@@ -118,7 +118,7 @@ Phase gate: OPEN
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
 | P1-01 | Repository scaffolding | Must | P0-01 | DONE | 2026-10-26 |  |
-| P1-02 | Rust workspace skeleton | Must | P1-01 | TODO |  |  |
+| P1-02 | Rust workspace skeleton | Must | P1-01 | DONE | 2026-10-26 |  |
 | P1-03 | Dev Postgres + Taskfile | Must | P1-02 | TODO |  |  |
 | P1-04 | Configuration module | Must | P1-02 | TODO |  |  |
 | P1-05 | Telemetry: logging + metrics | Must | P1-04 | TODO |  |  |
