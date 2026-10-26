@@ -26,7 +26,7 @@ Inside each task spec (phase files), the steps are checkboxes. They track progre
 ```markdown
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P1-02 | Rust workspace skeleton | Must | P1-01 | TODO | | |
+| P9-99 | Example row (format only) | Must | P9-98 | TODO | | |
 ```
 Priorities: `Must` (MVP blocker) · `Should` (MVP, can slip to the end of its phase) · `Could` (nice to have).
 The board is the **only** place for task-level status. The phase files hold only specs and step checkboxes.
@@ -119,8 +119,8 @@ Phase gate: OPEN
 |----|-------|-----|------|--------|---------|-------|
 | P1-01 | Repository scaffolding | Must | P0-01 | DONE | 2026-10-26 |  |
 | P1-02 | Rust workspace skeleton | Must | P1-01 | DONE | 2026-10-26 |  |
-| P1-03 | Dev Postgres + Taskfile | Must | P1-02 | TODO |  |  |
-| P1-04 | Configuration module | Must | P1-02 | TODO |  |  |
+| P1-03 | Dev Postgres + Taskfile | Must | P1-02 | DONE | 2026-10-26 |  |
+| P1-04 | Configuration module | Must | P1-02 | DONE | 2026-10-26 |  |
 | P1-05 | Telemetry: logging + metrics | Must | P1-04 | TODO |  |  |
 | P1-06 | App skeleton: state, router, errors, health, shutdown | Must | P1-05 | TODO |  |  |
 | P1-07 | Database pool + migrations + initial schema | Must | P1-03, P1-06 | TODO |  |  |

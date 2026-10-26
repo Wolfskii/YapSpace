@@ -2,11 +2,18 @@
 
 use clap::Parser;
 use yapspace_server::cli::{AdminCommand, Cli, Command};
+use yapspace_server::config::Config;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let name = match &cli.command {
-        Command::Serve => "serve",
+        Command::Serve => {
+            if let Err(e) = Config::from_env() {
+                eprintln!("yapspace serve: {e}");
+                std::process::exit(2);
+            }
+            "serve"
+        }
         Command::Migrate => "migrate",
         Command::Openapi { .. } => "openapi",
         Command::Healthcheck => "healthcheck",

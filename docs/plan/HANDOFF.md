@@ -26,3 +26,14 @@ Newest entry at the bottom. Template:
 - Checks: `cargo build --workspace` ok; `cargo fmt --all --check` ok; `cargo clippy --workspace --all-targets -- -D warnings` ok; `yapspace --help` lists the 5 subcommands.
 - Gap: `cargo deny check` not run yet (cargo-deny not installed). Install in P1-03 (`task setup`) and run it there.
 - Next: P1-03 (dev Postgres compose + Taskfile).
+
+## 2026-10-26 · P1-03 · TODO → DONE
+- Did: `compose.yaml` (dev Postgres 18-alpine on 127.0.0.1:5432, healthcheck) and `Taskfile.yml` (setup, dev:db:*, db:*, api:*, docker:build, check). `cargo-deny` installed. `deny.toml` fixed: `private = { ignore = true }` for unpublished workspace crates; workspace license field removed (not SPDX); path dep has a version.
+- Checks: `task dev:db:up` healthy, Postgres 18.4 confirmed; `task check` exit 0 (lint, tests, deny).
+- Notes: `cargo deny` prints duplicate-version warnings (`multiple-versions = warn`). Acceptable for now; revisit at P5-08.
+- Next: P1-05 (telemetry).
+
+## 2026-10-26 · P1-04 · TODO → DONE
+- Did: `config.rs` (Config::from_env / from_lookup, `_FILE` precedence, lists, bool/number parsing, validation, redacting Debug). 9 unit tests. `serve` loads config and exits 2 with a clear message when the DB URL is missing.
+- Checks: `cargo test -p yapspace-server config` 9 passed; direct run of the binary exits 2 without the URL. (Note: running through `env -u` in Git Bash returned a misleading exit 0. Run the binary directly to check exit codes.)
+- Next: P1-05 (telemetry: logging + metrics).
