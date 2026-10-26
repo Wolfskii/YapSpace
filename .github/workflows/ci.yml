@@ -47,6 +47,10 @@ jobs:
         run: cargo run -q -p yapspace-server -- migrate
       - name: Tests
         run: cargo test --workspace
+      - name: OpenAPI drift (regenerating must not change the committed spec)
+        run: |
+          cargo run -q -p yapspace-server -- openapi --out docs/api/openapi.json
+          git diff --exit-code docs/api/openapi.json
 
   deny:
     name: cargo-deny (advisories, licenses, sources)

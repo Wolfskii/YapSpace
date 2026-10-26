@@ -8,12 +8,13 @@ use std::{
 };
 
 use axum::{
-    Router,
+    Json, Router,
     body::Body,
     extract::Request,
     http::{HeaderName, StatusCode, header},
     middleware::{self, Next},
     response::Response,
+    routing::get,
 };
 use serde_json::json;
 use sqlx::PgPool;
@@ -31,7 +32,15 @@ use tower_http::{
     trace::{DefaultOnFailure, TraceLayer},
 };
 
-use crate::{api, config::Config, db, error::AppError, telemetry};
+use utoipa_scalar::{Scalar, Servable};
+
+use crate::{
+    api,
+    config::{Config, Env},
+    db,
+    error::AppError,
+    telemetry,
+};
 
 pub const REQUEST_ID_HEADER: HeaderName = HeaderName::from_static("x-request-id");
 
@@ -76,9 +85,22 @@ impl AppState {
 
 /// Builds the router. Layers are listed innermost first. The last `.layer` call is the outermost layer.
 pub fn build_router(state: AppState) -> Router {
-    api::router()
-        .route_layer(middleware::from_fn(telemetry::http_metrics))
-        .layer(CompressionLayer::new())
+    let (api_router, openapi) = api::router().split_for_parts();
+    let mut app = api_router.route_layer(middleware::from_fn(telemetry::http_metrics));
+    if state.config.env == Env::Dev {
+        // The docs UI and the raw spec exist only in dev, so production does not publish its full API surface.
+        let spec = Arc::new(openapi.clone());
+        app = app
+            .merge(Router::<AppState>::from(Scalar::with_url("/docs", openapi)))
+            .route(
+                "/openapi.json",
+                get(move || {
+                    let spec = Arc::clone(&spec);
+                    async move { Json((*spec).clone()) }
+                }),
+            );
+    }
+    app.layer(CompressionLayer::new())
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             REQUEST_TIMEOUT,

@@ -1,7 +1,10 @@
 //! Entry point for the `yapspace` binary.
 
+use std::path::Path;
+
 use clap::Parser;
 use yapspace_server::{
+    api::openapi as api_openapi,
     app::{self, AppState},
     cli::{AdminCommand, Cli, Command},
     config::Config,
@@ -15,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Serve => serve().await,
         Command::Healthcheck => healthcheck().await,
         Command::Migrate => migrate().await,
-        Command::Openapi { .. } => not_implemented("openapi"),
+        Command::Openapi { out } => openapi(&out),
         Command::Admin {
             command: AdminCommand::SetRole { .. },
         } => not_implemented("admin set-role"),
@@ -59,6 +62,16 @@ async fn healthcheck() -> anyhow::Result<()> {
         .unwrap_or_else(|| "0.0.0.0:8080".into());
     let bind = bind.trim().parse()?;
     app::run_healthcheck(bind).await
+}
+
+fn openapi(out: &Path) -> anyhow::Result<()> {
+    let json = api_openapi::to_pretty_json()?;
+    if let Some(parent) = out.parent().filter(|p| !p.as_os_str().is_empty()) {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(out, json)?;
+    println!("wrote {}", out.display());
+    Ok(())
 }
 
 fn not_implemented(name: &str) -> anyhow::Result<()> {

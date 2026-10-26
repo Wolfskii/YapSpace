@@ -1,15 +1,18 @@
 //! HTTP layer: extract, call domain, map to DTO.
 
-use axum::{Router, routing::get};
+use utoipa::OpenApi;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::app::AppState;
 
 pub mod extractors;
 pub mod health;
+pub mod openapi;
 
-/// Routes that are not under `/v1`. Real API routes are added in Phase 2.
-pub fn router() -> Router<AppState> {
-    Router::new()
-        .route("/healthz", get(health::healthz))
-        .route("/readyz", get(health::readyz))
+/// Routes that are not under `/v1`. Real API routes are added in Phase 2. Each handler registers its path in the
+/// OpenAPI document through `routes!`.
+pub fn router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::with_openapi(openapi::ApiDoc::openapi())
+        .routes(routes!(health::healthz))
+        .routes(routes!(health::readyz))
 }

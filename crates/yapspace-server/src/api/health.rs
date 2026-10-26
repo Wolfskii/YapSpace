@@ -15,6 +15,15 @@ use crate::app::AppState;
 const DB_CHECK_TIMEOUT: Duration = Duration::from_secs(2);
 
 /// Liveness: 200 while the process is serving, 503 once shutdown has started.
+#[utoipa::path(
+    get,
+    path = "/healthz",
+    tag = "health",
+    responses(
+        (status = 200, description = "The process is serving"),
+        (status = 503, description = "Shutdown has started"),
+    )
+)]
 pub async fn healthz(State(state): State<AppState>) -> Response {
     if state.is_draining() {
         return (
@@ -27,6 +36,15 @@ pub async fn healthz(State(state): State<AppState>) -> Response {
 }
 
 /// Readiness: 200 when the database answers within 2 s and the process is not draining, else 503.
+#[utoipa::path(
+    get,
+    path = "/readyz",
+    tag = "health",
+    responses(
+        (status = 200, description = "The database answers and the process is not draining"),
+        (status = 503, description = "Not ready: the database is unreachable or shutdown has started"),
+    )
+)]
 pub async fn readyz(State(state): State<AppState>) -> Response {
     if state.is_draining() {
         return (

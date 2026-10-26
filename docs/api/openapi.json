@@ -1,0 +1,52 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "YapSpace API",
+    "description": "Public API for YapSpace, the shared discussion layer for web pages.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness: 200 while the process is serving, 503 once shutdown has started.",
+        "operationId": "healthz",
+        "responses": {
+          "200": {
+            "description": "The process is serving"
+          },
+          "503": {
+            "description": "Shutdown has started"
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readiness: 200 when the database answers within 2 s and the process is not draining, else 503.",
+        "operationId": "readyz",
+        "responses": {
+          "200": {
+            "description": "The database answers and the process is not draining"
+          },
+          "503": {
+            "description": "Not ready: the database is unreachable or shutdown has started"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "session_token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

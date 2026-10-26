@@ -69,3 +69,9 @@ Newest entry at the bottom. Template:
 ## 2026-10-26 · P1-06 · IN_REVIEW → DONE
 - Checks: manual Ctrl-C with `task api:run` logged "shutdown signal received" then "shutdown complete" at once.
 - Next: P1-11 (OpenAPI skeleton) is unblocked. P1-10 still waits on the GitHub remote (D-03).
+
+## 2026-10-26 · P1-11 · TODO → IN_REVIEW
+- Did: `api/openapi.rs` (ApiDoc metadata, `session_token` bearer scheme, `document()` built from the router so `routes!` paths are included), `#[utoipa::path]` on healthz/readyz, `openapi --out` command, `/openapi.json` and `/docs` (Scalar) mounted only when YAPSPACE_ENV=dev, CI drift step, `docs/api/openapi.json` committed.
+- Checks: spec contains /healthz and /readyz; regenerating gives byte-identical output; dev: /openapi.json 200 and /docs 200; prod: both 404; tests and clippy pass.
+- Not done: Redocly lint. The command was denied by the permission checker (it runs an external npm package). Run `npx @redocly/cli lint docs/api/openapi.json` yourself and set P1-11 to DONE if it passes.
+- Next: P1-10 (needs the GitHub remote, D-03).

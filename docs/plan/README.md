@@ -127,7 +127,7 @@ Phase gate: OPEN
 | P1-08 | Integration test harness | Must | P1-07 | DONE | 2026-10-26 |  |
 | P1-09 | Dockerfile + image healthcheck | Must | P1-07 | DONE | 2026-10-26 | Image 61.4 MB vs 60 MB target (accepted; distroless base + binary) |
 | P1-10 | CI workflow | Must | P1-08, P1-09 | IN_REVIEW | 2026-10-26 | Needs GitHub remote (D-03) to run; YAML validated locally |
-| P1-11 | OpenAPI skeleton + docs UI | Must | P1-06 | TODO |  |  |
+| P1-11 | OpenAPI skeleton + docs UI | Must | P1-06 | IN_REVIEW | 2026-10-26 | Redocly lint not run (blocked); run `npx @redocly/cli lint docs/api/openapi.json` once |
 
 Phase gate: OPEN
 
