@@ -122,7 +122,7 @@ Phase gate: OPEN
 | P1-03 | Dev Postgres + Taskfile | Must | P1-02 | DONE | 2026-10-26 |  |
 | P1-04 | Configuration module | Must | P1-02 | DONE | 2026-10-26 |  |
 | P1-05 | Telemetry: logging + metrics | Must | P1-04 | DONE | 2026-10-26 |  |
-| P1-06 | App skeleton: state, router, errors, health, shutdown | Must | P1-05 | IN_REVIEW | 2026-10-26 | Manual check: Ctrl-C shutdown with the real console signal (see handoff) |
+| P1-06 | App skeleton: state, router, errors, health, shutdown | Must | P1-05 | DONE | 2026-10-26 | Ctrl-C verified manually |
 | P1-07 | Database pool + migrations + initial schema | Must | P1-03, P1-06 | DONE | 2026-10-26 |  |
 | P1-08 | Integration test harness | Must | P1-07 | DONE | 2026-10-26 |  |
 | P1-09 | Dockerfile + image healthcheck | Must | P1-07 | DONE | 2026-10-26 | Image 61.4 MB vs 60 MB target (accepted; distroless base + binary) |

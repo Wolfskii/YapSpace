@@ -65,3 +65,7 @@ Newest entry at the bottom. Template:
 ## 2026-10-26 · P1-10 · TODO → IN_REVIEW
 - Did: `.github/workflows/ci.yml` (rust: fmt, clippy, migrate from zero, tests with a postgres 18 service; deny; docker: build + compose smoke + Trivy; guards: no {@html}, no AI attribution in PR commits), `compose.ci.yaml`, `.github/dependabot.yml`.
 - Checks: YAML parses. Not run on GitHub yet. Deferred on purpose: the OpenAPI drift check (added with P1-11).
+
+## 2026-10-26 · P1-06 · IN_REVIEW → DONE
+- Checks: manual Ctrl-C with `task api:run` logged "shutdown signal received" then "shutdown complete" at once.
+- Next: P1-11 (OpenAPI skeleton) is unblocked. P1-10 still waits on the GitHub remote (D-03).
