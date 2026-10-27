@@ -43,6 +43,7 @@ pub fn test_config() -> Config {
     Config::from_lookup(|key| match key {
         "YAPSPACE_DATABASE_URL" => Some("postgres://unused@127.0.0.1:1/unused".into()),
         "YAPSPACE_SHUTDOWN_GRACE_SECS" => Some("2".into()),
+        "YAPSPACE_RATE_LIMIT_ENABLED" => Some("false".into()),
         _ => None,
     })
     .expect("test config is valid")

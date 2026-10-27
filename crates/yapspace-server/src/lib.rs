@@ -11,4 +11,5 @@ pub mod error;
 pub mod jobs;
 pub mod ratelimit;
 pub mod realtime;
+pub mod spam;
 pub mod telemetry;

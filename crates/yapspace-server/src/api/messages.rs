@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
+use crate::client_ip::ClientIp;
 use crate::{
     api::{
         dto::{MessageDto, message_dto},
@@ -97,10 +98,20 @@ pub async fn list_messages(
 pub async fn post_message(
     State(state): State<AppState>,
     user: AuthUser,
+    ClientIp(ip): ClientIp,
     Path(id): Path<Uuid>,
     ApiJson(body): ApiJson<PostMessageRequest>,
 ) -> Result<(StatusCode, Json<MessageDto>), AppError> {
-    let posted = service::post(&state, &user, id, &body.body, body.parent_id, body.client_msg_id).await?;
+    let posted = service::post(
+        &state,
+        &user,
+        ip,
+        id,
+        &body.body,
+        body.parent_id,
+        body.client_msg_id,
+    )
+    .await?;
     let status = if posted.created {
         StatusCode::CREATED
     } else {

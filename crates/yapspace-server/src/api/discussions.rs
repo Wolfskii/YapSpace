@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+use crate::client_ip::ClientIp;
 use crate::{
     api::{
         dto::{DiscussionDto, IdentityDto, discussion_dto},
@@ -60,8 +61,10 @@ pub struct ResolveResponse {
 )]
 pub async fn resolve(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     ApiJson(body): ApiJson<ResolveRequest>,
 ) -> Result<Json<ResolveResponse>, AppError> {
+    state.limits.resolve.check(&ip)?;
     let resolution = service::resolve(&state, &body.url, body.canonical_url.as_deref()).await?;
     let identity = IdentityDto {
         kind: resolution.identity.kind.as_str().to_owned(),
@@ -97,6 +100,7 @@ pub async fn create(
     ApiJson(body): ApiJson<CreateDiscussionRequest>,
 ) -> Result<(StatusCode, Json<DiscussionDto>), AppError> {
     user.ensure_can_write()?;
+    state.limits.create_discussion.check(&user.user_id)?;
     let (row, created) = service::create(
         &state,
         user.user_id,

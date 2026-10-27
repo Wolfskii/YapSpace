@@ -31,6 +31,8 @@ pub struct Config {
     pub allowed_ws_origins: Vec<String>,
     pub ws_max_connections: usize,
     pub registration_open: bool,
+    /// Turns the request rate limits on or off. Tests turn them off unless they test limits.
+    pub rate_limit_enabled: bool,
     pub extra_blocked_hosts: Vec<String>,
     pub shutdown_grace: Duration,
 }
@@ -49,6 +51,7 @@ impl fmt::Debug for Config {
             .field("allowed_ws_origins", &self.allowed_ws_origins)
             .field("ws_max_connections", &self.ws_max_connections)
             .field("registration_open", &self.registration_open)
+            .field("rate_limit_enabled", &self.rate_limit_enabled)
             .field("extra_blocked_hosts", &self.extra_blocked_hosts)
             .field("shutdown_grace", &self.shutdown_grace)
             .finish()
@@ -133,6 +136,7 @@ impl Config {
             allowed_ws_origins: list(&get, "YAPSPACE_ALLOWED_WS_ORIGINS")?,
             ws_max_connections: parse_or(&get, "YAPSPACE_WS_MAX_CONNECTIONS", 20_000usize)?,
             registration_open: parse_bool_or(&get, "YAPSPACE_REGISTRATION_OPEN", true)?,
+            rate_limit_enabled: parse_bool_or(&get, "YAPSPACE_RATE_LIMIT_ENABLED", true)?,
             extra_blocked_hosts: list(&get, "YAPSPACE_EXTRA_BLOCKED_HOSTS")?,
             shutdown_grace: Duration::from_secs(parse_or(&get, "YAPSPACE_SHUTDOWN_GRACE_SECS", 20u64)?),
         })

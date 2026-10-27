@@ -1,5 +1,7 @@
 //! Posting, reading, and deleting messages (data-model.md Q2, Q3, Q5; api.md §F.1 pagination and idempotency).
 
+use std::net::IpAddr;
+
 use uuid::Uuid;
 
 use crate::{
@@ -15,6 +17,8 @@ use crate::{
 
 pub const DEFAULT_PAGE: i64 = 50;
 pub const MAX_PAGE: i64 = 100;
+/// Accounts younger than a day may post into at most this many discussions per window (spam.rs).
+const NEW_ACCOUNT_DISCUSSIONS: usize = crate::spam::NEW_ACCOUNT_DISCUSSION_LIMIT;
 
 /// Result of posting. `created` is false when the same client id was already stored (an idempotent retry).
 pub struct Posted {
@@ -49,13 +53,44 @@ async fn ensure_visible_discussion(state: &AppState, discussion_id: Uuid) -> Res
 pub async fn post(
     state: &AppState,
     author: &AuthUser,
+    ip: IpAddr,
     discussion_id: Uuid,
     raw_body: &str,
     parent_id: Option<Uuid>,
     client_msg_id: Uuid,
 ) -> Result<Posted, AppError> {
     author.ensure_can_write()?;
+
+    // A retry is not a new message, so it returns the stored one before any limit or spam check runs.
+    if let Some(existing) =
+        messages::find_by_client_id(&mut *state.db.acquire().await?, author.user_id, client_msg_id).await?
+    {
+        return Ok(Posted {
+            message: load(state, existing).await?,
+            created: false,
+        });
+    }
+
+    state.limits.post_ip.check(&ip)?;
+    if author.is_new_account() {
+        state.limits.post_user_new.check(&author.user_id)?;
+    } else {
+        state.limits.post_user.check(&author.user_id)?;
+    }
     let body = normalize_body(raw_body).map_err(|err| AppError::Validation(vec![err]))?;
+    if state.spam.is_duplicate(author.user_id, &body) {
+        return Err(AppError::Validation(vec![FieldError::new(
+            "body",
+            "duplicate_message",
+            "you already posted this message recently",
+        )]));
+    }
+    if author.is_new_account() {
+        let discussions_seen = state.spam.note_discussion(author.user_id, discussion_id);
+        if discussions_seen > NEW_ACCOUNT_DISCUSSIONS {
+            return Err(AppError::RateLimited { retry_after_s: 300 });
+        }
+    }
     ensure_visible_discussion(state, discussion_id).await?;
 
     let mut tx = state.db.begin().await?;
@@ -114,6 +149,7 @@ pub async fn post(
     tx.commit().await?;
 
     // Realtime publish happens here, after commit (realtime.md §G.3). Added in Phase 3.
+    state.spam.remember(author.user_id, &body);
     metrics::counter!("messages_created_total").increment(1);
 
     Ok(Posted {

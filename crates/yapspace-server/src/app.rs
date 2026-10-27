@@ -10,7 +10,7 @@ use std::{
 use axum::{
     Json, Router,
     body::Body,
-    extract::Request,
+    extract::{ConnectInfo, Request, State},
     http::{HeaderName, StatusCode, header},
     middleware::{self, Next},
     response::Response,
@@ -40,6 +40,8 @@ use crate::{
     db,
     domain::passwords::PasswordHasher,
     error::AppError,
+    ratelimit::Limits,
+    spam::SpamGuard,
     telemetry,
 };
 
@@ -61,6 +63,10 @@ pub struct AppState {
     pub tasks: TaskTracker,
     /// Argon2id hashing with a concurrency limit.
     pub hasher: Arc<PasswordHasher>,
+    /// Request rate limits.
+    pub limits: Arc<Limits>,
+    /// Duplicate and new-account spam checks.
+    pub spam: Arc<SpamGuard>,
 }
 
 impl AppState {
@@ -73,12 +79,15 @@ impl AppState {
 
     /// Builds the state around an existing pool. Tests use this with the pool that `sqlx::test` provides.
     pub fn with_pool(config: Config, db: PgPool) -> Self {
+        let config_enabled = config.rate_limit_enabled;
         Self {
             db,
             config: Arc::new(config),
             shutdown: CancellationToken::new(),
             tasks: TaskTracker::new(),
             hasher: Arc::new(PasswordHasher::new()),
+            limits: Arc::new(Limits::new(config_enabled)),
+            spam: Arc::new(SpamGuard::new()),
         }
     }
 
@@ -122,7 +131,24 @@ pub fn build_router(state: AppState) -> Router {
         .layer(middleware::from_fn(sanitize_request_id))
         .layer(middleware::from_fn(fill_request_id))
         .layer(CatchPanicLayer::new())
+        .layer(middleware::from_fn_with_state(state.clone(), global_rate_limit))
         .with_state(state)
+}
+
+/// Backstop limit for every request from one client, including unknown routes. The per-endpoint limits are tighter.
+async fn global_rate_limit(
+    State(state): State<AppState>,
+    request: Request,
+    next: Next,
+) -> Result<Response, AppError> {
+    let peer = request
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|info| info.0.ip())
+        .unwrap_or(std::net::IpAddr::V4(Ipv4Addr::LOCALHOST));
+    let ip = crate::client_ip::resolve_ip(peer, request.headers(), &state.config.trusted_proxies);
+    state.limits.global_ip.check(&ip)?;
+    Ok(next.run(request).await)
 }
 
 async fn not_found() -> AppError {

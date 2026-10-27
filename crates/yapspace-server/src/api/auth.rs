@@ -4,6 +4,7 @@ use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
 use utoipa::ToSchema;
 
+use crate::client_ip::ClientIp;
 use crate::{
     api::{
         dto::{AuthResponse, user_dto},
@@ -71,8 +72,10 @@ fn auth_response(issued: service::Issued) -> AuthResponse {
 )]
 pub async fn register(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     ApiJson(body): ApiJson<RegisterRequest>,
 ) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
+    state.limits.register.check(&ip)?;
     let issued = service::register(
         &state,
         &body.username,
@@ -96,8 +99,14 @@ pub async fn register(
 )]
 pub async fn login(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     ApiJson(body): ApiJson<LoginRequest>,
 ) -> Result<Json<AuthResponse>, AppError> {
+    state.limits.login_ip.check(&ip)?;
+    state
+        .limits
+        .login_ip_user
+        .check(&format!("{ip}|{}", body.username.trim().to_ascii_lowercase()))?;
     let issued = service::login(
         &state,
         &body.username,
@@ -138,8 +147,10 @@ pub async fn logout(State(state): State<AppState>, user: AuthUser) -> Result<Sta
 )]
 pub async fn recover(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     ApiJson(body): ApiJson<RecoverRequest>,
 ) -> Result<Json<AuthResponse>, AppError> {
+    state.limits.recover.check(&ip)?;
     let issued = service::recover(
         &state,
         &body.username,

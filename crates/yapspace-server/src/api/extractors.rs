@@ -55,9 +55,15 @@ pub struct AuthUser {
     pub username: String,
     pub role: Role,
     pub suspended: bool,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 impl AuthUser {
+    /// Accounts younger than 24 hours get stricter posting limits (security.md §H.4).
+    pub fn is_new_account(&self) -> bool {
+        chrono::Utc::now() - self.created_at < chrono::Duration::hours(24)
+    }
+
     /// Writes are refused for suspended accounts. Reads still work, so a user can see why they were suspended.
     pub fn ensure_can_write(&self) -> Result<(), AppError> {
         if self.suspended {
@@ -111,6 +117,7 @@ where
             username: row.username,
             role: Role::parse(&row.role),
             suspended: is_suspended(&row.status, row.suspended_until),
+            created_at: row.created_at,
         })
     }
 }

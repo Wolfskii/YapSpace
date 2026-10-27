@@ -13,6 +13,7 @@ pub struct AuthRow {
     pub role: String,
     pub status: String,
     pub suspended_until: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone)]
@@ -49,7 +50,7 @@ pub async fn find_active_by_token_hash(
 ) -> Result<Option<AuthRow>, sqlx::Error> {
     sqlx::query_as!(
         AuthRow,
-        r#"SELECT s.id AS session_id, s.user_id, u.username, u.role, u.status, u.suspended_until
+        r#"SELECT s.id AS session_id, s.user_id, u.username, u.role, u.status, u.suspended_until, u.created_at
            FROM sessions s JOIN users u ON u.id = s.user_id
            WHERE s.token_hash = $1 AND s.revoked_at IS NULL AND s.expires_at > now() AND u.status <> 'deleted'"#,
         token_hash
