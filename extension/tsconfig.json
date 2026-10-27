@@ -1,0 +1,17 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "types": [
+      "vite/client"
+    ],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*",
+    "entrypoints/**/*",
+    "tests/**/*",
+    "wxt.config.ts",
+    "env.d.ts"
+  ]
+}

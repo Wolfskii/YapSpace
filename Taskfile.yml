@@ -65,6 +65,46 @@ tasks:
     desc: Regenerate docs/api/openapi.json
     cmds: [cargo run -q -p yapspace-server -- openapi --out docs/api/openapi.json]
 
+  ext:install:
+    desc: Install extension dependencies from the lockfile
+    dir: extension
+    cmds: [npm ci --no-audit --no-fund]
+
+  ext:types:
+    desc: Regenerate extension API types from docs/api/openapi.json
+    dir: extension
+    cmds: [npm run types:api]
+
+  ext:dev:
+    desc: Run the extension in Chrome with live reload (needs the API running)
+    dir: extension
+    cmds: [npm run dev]
+
+  ext:dev:firefox:
+    desc: Run the extension in Firefox with live reload
+    dir: extension
+    cmds: [npm run dev:firefox]
+
+  ext:test:
+    desc: Extension unit tests
+    dir: extension
+    cmds: [npm test]
+
+  ext:lint:
+    desc: Type-check the extension (svelte-check, strict TypeScript)
+    dir: extension
+    cmds: [npm run check]
+
+  ext:build:
+    desc: Build the extension for Chrome and Firefox
+    dir: extension
+    cmds: [npm run build, npm run build:firefox]
+
+  ext:zip:
+    desc: Package store zips for Chrome and Firefox
+    dir: extension
+    cmds: [npm run zip, npm run zip:firefox]
+
   docker:build:
     desc: Build the production image locally (tag yapspace:dev)
     cmds: [docker build -t yapspace:dev .]
@@ -75,3 +115,6 @@ tasks:
       - task: api:lint
       - task: api:test
       - task: api:deny
+      - task: ext:lint
+      - task: ext:test
+      - task: ext:build
