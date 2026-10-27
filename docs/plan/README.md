@@ -166,15 +166,15 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P3-01 | Protocol types | Must | P2-22 | TODO |  |  |
-| P3-02 | Hub | Must | P3-01 | TODO |  |  |
-| P3-03 | WebSocket endpoint & connection task | Must | P3-02, P2-18 | TODO |  |  |
-| P3-04 | Subscribe with gap-free catch-up | Must | P3-03 | TODO |  |  |
-| P3-05 | Publish from the domain | Must | P3-04 | TODO |  |  |
-| P3-06 | Graceful shutdown for sockets | Must | P3-05 | TODO |  |  |
-| P3-07 | Authenticated hello + per-user connection cap | Should | P3-03 | TODO |  |  |
-| P3-08 | Realtime robustness test suite | Must | P3-06 | TODO |  |  |
-| P3-09 | Load scripts + first measurements | Should | P3-08 | TODO |  |  |
+| P3-01 | Protocol types | Must | P2-22 | DONE | 2026-10-27 |  |
+| P3-02 | Hub | Must | P3-01 | DONE | 2026-10-27 | Hub with broadcast per discussion |
+| P3-03 | WebSocket endpoint & connection task | Must | P3-02, P2-18 | DONE | 2026-10-27 |  |
+| P3-04 | Subscribe with gap-free catch-up | Must | P3-03 | DONE | 2026-10-27 | Subscribe first, then replay; gap fill from DB on out-of-order publish |
+| P3-05 | Publish from the domain | Must | P3-04 | DONE | 2026-10-27 | Publish after commit for create and delete |
+| P3-06 | Graceful shutdown for sockets | Must | P3-05 | DONE | 2026-10-27 | Shutdown closes sockets with 1012 (tested) |
+| P3-07 | Authenticated hello + per-user connection cap | Should | P3-03 | DONE | 2026-10-27 | Per-account cap of 10 sockets (tested) |
+| P3-08 | Realtime robustness test suite | Must | P3-06 | IN_REVIEW | 2026-10-27 | Slow-consumer 4008 is not tested end to end; 1009 and 4004 check that the connection ends (TCP reset hides the code) |
+| P3-09 | Load scripts + first measurements | Should | P3-08 | TODO | 2026-10-27 | Needs k6 and a measured run |
 
 Phase gate: OPEN
 
