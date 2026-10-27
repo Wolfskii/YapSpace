@@ -34,7 +34,7 @@ jobs:
       DATABASE_URL: postgres://yapspace:yapspace@127.0.0.1:5432/yapspace
       YAPSPACE_DATABASE_URL: postgres://yapspace:yapspace@127.0.0.1:5432/yapspace
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.98
         with:
           components: rustfmt, clippy
@@ -56,7 +56,7 @@ jobs:
     name: extension (types, tests, builds)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -85,7 +85,7 @@ jobs:
     name: cargo-deny (advisories, licenses, sources)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [rust]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build image
         run: docker build --build-arg GIT_SHA=${{ github.sha }} -t yapspace:ci .
       - name: Compose smoke test
@@ -121,7 +121,7 @@ jobs:
     name: repository guards
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: No raw HTML injection in Svelte
