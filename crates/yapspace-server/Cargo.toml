@@ -33,7 +33,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 clap = { version = "4", features = ["derive", "env"] }
 argon2 = "0.6"
 rand = "0.10"
-sha2 = "0.10"
+sha2 = "0.11"
 base64 = "0.22"
 governor = "0.10"
 dashmap = "6"
