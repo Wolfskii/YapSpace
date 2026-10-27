@@ -105,7 +105,7 @@ See [decisions.md](decisions.md). D-01 to D-07 do not block Phases 1–4.
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
 | P0-01 | Save the plan into the repo | Must | — | DONE | 2026-10-26 |  |
-| P0-02 | Architecture diagrams check | Should | P0-01 | TODO |  | parallel-OK |
+| P0-02 | Architecture diagrams check | Should | P0-01 | TODO | 2026-10-27 | Sequence diagrams not drawn yet |
 | P0-03 | Write ADRs 0001–0015 | Must | P0-01 | DONE |  | parallel-OK |
 | P0-04 | URL identity test vectors | Must | P0-01 | DONE | 2026-10-27 | 90 vectors, all pass |
 | P0-05 | Decisions log | Must | P0-01 | DONE | 2026-10-26 |  |
@@ -183,19 +183,19 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P4-01 | Scaffold WXT + Svelte | Must | P1-10 | TODO |  |  |
-| P4-02 | Spike: injection model on real sites (validates ADR 0011) | Must | P4-01 | TODO |  |  |
-| P4-03 | Page context pipeline | Must | P4-02 | TODO |  |  |
-| P4-04 | API client + generated types | Must | P4-01, P2-21 | TODO |  |  |
-| P4-05 | Session store + auth UI | Must | P4-04 | TODO |  |  |
-| P4-06 | Discussion store (state machine + pagination) | Must | P4-05, P4-03 | TODO |  |  |
-| P4-07 | Message list UI | Must | P4-06 | TODO |  |  |
-| P4-08 | Composer (post, reply, first post creates the discussion) | Must | P4-07 | TODO |  |  |
-| P4-09 | Realtime client integration | Must | P4-08, P3-05 | TODO |  |  |
-| P4-10 | Report + delete own message (client) | Must | P4-09 | TODO |  |  |
-| P4-11 | States, a11y, i18n polish | Must | P4-09 | TODO |  |  |
-| P4-12 | Cross-browser validation + store packaging docs | Must | P4-11 | TODO |  |  |
-| P4-13 | Playwright e2e (Chromium) | Should | P4-11 | TODO |  |  |
+| P4-01 | Scaffold WXT + Svelte | Must | P1-10 | DONE | 2026-10-27 | WXT 0.21, Svelte 5, strict TypeScript. No eslint or icons yet |
+| P4-02 | Spike: injection model on real sites (validates ADR 0011) | Must | P4-01 | IN_REVIEW | 2026-10-27 | Needs a manual run in Chrome and Firefox on the 20-site list |
+| P4-03 | Page context pipeline | Must | P4-02 | DONE | 2026-10-27 | Page context pipeline with the canonical SPA guard |
+| P4-04 | API client + generated types | Must | P4-01, P2-21 | DONE | 2026-10-27 | Typed client from schema.d.ts (drift-checked in CI) |
+| P4-05 | Session store + auth UI | Must | P4-04 | IN_REVIEW | 2026-10-27 | Sign-in, register and recovery code view. No component tests yet |
+| P4-06 | Discussion store (state machine + pagination) | Must | P4-05, P4-03 | DONE | 2026-10-27 | Discussion store with generation guard (tested) |
+| P4-07 | Message list UI | Must | P4-06 | IN_REVIEW | 2026-10-27 | Message list with safe links. No axe check yet |
+| P4-08 | Composer (post, reply, first post creates the discussion) | Must | P4-07 | DONE | 2026-10-27 | Composer with idempotent retry |
+| P4-09 | Realtime client integration | Must | P4-08, P3-05 | DONE | 2026-10-27 | Realtime client: backoff, jitter, pong watchdog (tested) |
+| P4-10 | Report + delete own message (client) | Must | P4-09 | IN_REVIEW | 2026-10-27 | Delete own message done. Report dialog not built yet (server ready) |
+| P4-11 | States, a11y, i18n polish | Must | P4-09 | IN_REVIEW | 2026-10-27 | No i18n file yet. Strings are inline |
+| P4-12 | Cross-browser validation + store packaging docs | Must | P4-11 | TODO | 2026-10-27 | Manual checklist and store docs not written |
+| P4-13 | Playwright e2e (Chromium) | Should | P4-11 | TODO | 2026-10-27 | Playwright e2e not written |
 
 Phase gate: OPEN
 
@@ -204,22 +204,22 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P5-01 | Threat model review | Must | — (start of phase) | TODO |  |  |
-| P5-02 | Reports API | Must | P2-22 | TODO |  |  |
-| P5-03 | Moderation API + enforcement | Must | P5-02 | TODO |  |  |
-| P5-04 | Moderation UI (extension) | Should | P5-03 | TODO |  |  |
-| P5-05 | Blocks | Should | P5-02 | TODO |  |  |
-| P5-06 | Account deletion + export | Must | P5-03 | TODO |  |  |
-| P5-07 | Background jobs | Must | P5-06 | TODO |  |  |
-| P5-08 | Hardening pass | Must | P5-03 | TODO |  |  |
-| P5-09 | Production compose + Caddy | Must | P1-09, D-01, D-02 | TODO |  |  |
-| P5-10 | Backups + restore test | Must | P5-09 | TODO |  |  |
-| P5-11 | Monitoring profile + alerts | Should | P5-09 | TODO |  |  |
-| P5-12 | Load & soak validation | Must | P5-09, P3-09 | TODO |  |  |
-| P5-13 | Runbooks + DR drill | Must | P5-10 | TODO |  |  |
-| P5-14 | Privacy notice, terms, store disclosures | Must | P5-06 | TODO |  |  |
-| P5-15 | Release workflow + deploy task | Must | P5-09, P1-10 | TODO |  |  |
-| P5-16 | Final security review + MVP sign-off | Must | every other P5 task | TODO |  |  |
+| P5-01 | Threat model review | Must | — (start of phase) | IN_REVIEW | 2026-10-27 | Human review of the threat model needed |
+| P5-02 | Reports API | Must | P2-22 | DONE | 2026-10-27 | Reports API with rate limit and idempotency (tested) |
+| P5-03 | Moderation API + enforcement | Must | P5-02 | DONE | 2026-10-27 | Moderation API with audit trail and staff rules (tested) |
+| P5-04 | Moderation UI (extension) | Should | P5-03 | TODO | 2026-10-27 | Moderation UI in the extension not built |
+| P5-05 | Blocks | Should | P5-02 | IN_REVIEW | 2026-10-27 | Server blocks API done (tested). Extension hiding not built |
+| P5-06 | Account deletion + export | Must | P5-03 | IN_REVIEW | 2026-10-27 | Deletion and export API done (tested). Extension settings not built |
+| P5-07 | Background jobs | Must | P5-06 | DONE | 2026-10-27 | Retention jobs with a schedule. No advisory lock (single instance) |
+| P5-08 | Hardening pass | Must | P5-03 | TODO | 2026-10-27 | SECURITY.md and the full hardening pass are still open |
+| P5-09 | Production compose + Caddy | Must | P1-09, D-01, D-02 | BLOCKED | 2026-10-27 | Needs D-01 (domain) and D-02 (VPS provider) |
+| P5-10 | Backups + restore test | Must | P5-09 | BLOCKED | 2026-10-27 | Needs D-02 (backup storage provider) |
+| P5-11 | Monitoring profile + alerts | Should | P5-09 | TODO | 2026-10-27 | Monitoring profile not written |
+| P5-12 | Load & soak validation | Must | P5-09, P3-09 | BLOCKED | 2026-10-27 | Needs a production-like VPS |
+| P5-13 | Runbooks + DR drill | Must | P5-10 | BLOCKED | 2026-10-27 | Needs a VPS for the DR drill |
+| P5-14 | Privacy notice, terms, store disclosures | Must | P5-06 | BLOCKED | 2026-10-27 | Needs D-05 and D-06 (legal review) |
+| P5-15 | Release workflow + deploy task | Must | P5-09, P1-10 | IN_REVIEW | 2026-10-27 | release.yml written. Runs when a tag is pushed |
+| P5-16 | Final security review + MVP sign-off | Must | every other P5 task | BLOCKED | 2026-10-27 | Needs the other Phase 5 items and your sign-off |
 
 Phase gate: OPEN
 
@@ -228,19 +228,19 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P6-01 | Usage & identity review | Must | Phase 5 gate | TODO |  |  |
-| P6-02 | `PgNotifyBus` + multi-instance | Could | Phase 5 gate | TODO |  |  |
-| P6-03 | Zero-downtime deploys | Could | Phase 5 gate | TODO |  |  |
-| P6-04 | Read cache | Could | Phase 5 gate | TODO |  |  |
-| P6-05 | Slow mode for hot discussions | Should | Phase 5 gate | TODO |  |  |
-| P6-06 | DB scaling analysis | Could | Phase 5 gate | TODO |  |  |
-| P6-07 | Admin discussion merge | Should | Phase 5 gate | TODO |  |  |
-| P6-08 | Search | Could | Phase 5 gate | TODO |  |  |
-| P6-09 | Reactions | Could | Phase 5 gate | TODO |  |  |
-| P6-10 | Page badges (optional host permission) | Could | Phase 5 gate | TODO |  |  |
-| P6-11 | Content adapters for feeds | Could | Phase 5 gate | TODO |  |  |
-| P6-12 | Side panel surface | Could | Phase 5 gate | TODO |  |  |
-| P6-13 | Abuse automation | Should | Phase 5 gate | TODO |  |  |
+| P6-01 | Usage & identity review | Must | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-02 | `PgNotifyBus` + multi-instance | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-03 | Zero-downtime deploys | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-04 | Read cache | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-05 | Slow mode for hot discussions | Should | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-06 | DB scaling analysis | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-07 | Admin discussion merge | Should | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-08 | Search | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-09 | Reactions | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-10 | Page badges (optional host permission) | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-11 | Content adapters for feeds | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-12 | Side panel surface | Could | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
+| P6-13 | Abuse automation | Should | Phase 5 gate | DEFERRED | 2026-10-27 | Starts with a measurement from production (see phase-6.md) |
 
 Phase gate: OPEN
 
@@ -249,11 +249,11 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P7-01 | Desktop requirements | Must | Phase 6 gate | TODO |  |  |
-| P7-02 | Confirm Tauri 2 | Must | Phase 6 gate | TODO |  |  |
-| P7-03 | Shared UI package extraction | Must | Phase 6 gate | TODO |  |  |
-| P7-04 | Desktop auth + discussions | Must | Phase 6 gate | TODO |  |  |
-| P7-05 | Packaging & updates | Must | Phase 6 gate | TODO |  |  |
-| P7-06 | Cross-platform test matrix + release docs | Must | Phase 6 gate | TODO |  |  |
+| P7-01 | Desktop requirements | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
+| P7-02 | Confirm Tauri 2 | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
+| P7-03 | Shared UI package extraction | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
+| P7-04 | Desktop auth + discussions | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
+| P7-05 | Packaging & updates | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
+| P7-06 | Cross-platform test matrix + release docs | Must | Phase 6 gate | DEFERRED | 2026-10-27 | Needs product validation (decision D-07 area) |
 
 Phase gate: OPEN

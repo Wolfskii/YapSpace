@@ -467,6 +467,163 @@
             "session_token": []
           }
         ]
+      },
+      "delete": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Deletes the account. Sessions end now, and message bodies are erased within a few minutes by a background job.",
+        "operationId": "delete_account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Account deletion accepted"
+          },
+          "401": {
+            "description": "Password is wrong"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/blocks": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Lists the users you have blocked.",
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "Blocked users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/blocks/{username}": {
+      "put": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Blocks a user. Repeating the call does nothing.",
+        "operationId": "block",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username to block",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Blocked"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such user"
+          },
+          "409": {
+            "description": "Block limit reached"
+          },
+          "422": {
+            "description": "You cannot block yourself"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Removes a block.",
+        "operationId": "unblock",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username to unblock",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unblocked (or was not blocked)"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/export": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Streams a JSON export of the account: profile, sessions and every message, in batches.",
+        "operationId": "export",
+        "responses": {
+          "200": {
+            "description": "JSON export",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
       }
     },
     "/v1/me/password": {
@@ -677,6 +834,513 @@
         ]
       }
     },
+    "/v1/mod/discussions/{id}/hide": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Hides a discussion from everyone except moderators.",
+        "operationId": "hide_discussion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Hidden"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/discussions/{id}/lock": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Locks a discussion: nobody can post until it is unlocked.",
+        "operationId": "lock_discussion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Locked"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/discussions/{id}/unhide": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Shows a hidden discussion again.",
+        "operationId": "unhide_discussion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Shown again"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/discussions/{id}/unlock": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Unlocks a discussion.",
+        "operationId": "unlock_discussion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Unlocked"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/messages/{id}/remove": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Removes a message from public view. The body is kept for appeals, and a job erases it after 90 days.",
+        "operationId": "remove_message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Message id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Removed"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such message"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/messages/{id}/restore": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Restores a removed message.",
+        "operationId": "restore_message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Message id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Restored"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such message"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/reports": {
+      "get": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Open reports, oldest first.",
+        "operationId": "queue",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque cursor from the previous page.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of open reports",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad cursor"
+          },
+          "403": {
+            "description": "Not a moderator"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/reports/{id}/resolve": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Marks a report as actioned or dismissed.",
+        "operationId": "resolve_report",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Report id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Resolved"
+          },
+          "403": {
+            "description": "Not a moderator"
+          },
+          "404": {
+            "description": "No such report"
+          },
+          "409": {
+            "description": "Already resolved"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/users/{id}/suspend": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Suspends an account. Moderators cannot suspend other moderators or admins. Suspended accounts can still read.",
+        "operationId": "suspend_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Suspended"
+          },
+          "403": {
+            "description": "Not allowed for this target"
+          },
+          "404": {
+            "description": "No such user"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/mod/users/{id}/unsuspend": {
+      "post": {
+        "tags": [
+          "moderation"
+        ],
+        "summary": "Lifts a suspension.",
+        "operationId": "unsuspend_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unsuspended"
+          },
+          "403": {
+            "description": "Not allowed for this target"
+          },
+          "404": {
+            "description": "No such user"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/reports": {
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Reports something. Reporting the same thing again returns the existing report with 200.",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Already reported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Report filed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "Target not found"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many reports today"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
     "/v1/users/{username}": {
       "get": {
         "tags": [
@@ -754,6 +1418,36 @@
           }
         }
       },
+      "BlockDto": {
+        "type": "object",
+        "required": [
+          "username",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "BlockList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockDto"
+            }
+          }
+        }
+      },
       "ChangePasswordRequest": {
         "type": "object",
         "required": [
@@ -794,6 +1488,35 @@
         },
         "additionalProperties": false
       },
+      "CreateReportRequest": {
+        "type": "object",
+        "required": [
+          "target_type",
+          "target_id",
+          "reason"
+        ],
+        "properties": {
+          "details": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "One of the reasons in api.md §F.2, for example `spam` or `wrong_discussion`."
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target_type": {
+            "type": "string",
+            "description": "`message`, `user` or `discussion`."
+          }
+        },
+        "additionalProperties": false
+      },
       "CurrentPasswordRequest": {
         "type": "object",
         "required": [
@@ -802,6 +1525,19 @@
         "properties": {
           "current_password": {
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeleteAccountRequest": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Confirms the deletion. A deleted account cannot be recovered."
           }
         },
         "additionalProperties": false
@@ -1098,6 +1834,92 @@
           }
         }
       },
+      "QueueItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "reporter_id",
+          "target_type",
+          "target_id",
+          "reason",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reporter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target_type": {
+            "type": "string"
+          }
+        }
+      },
+      "QueuePage": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueItem"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Pass this as `cursor` to get the next page. `null` on the last page."
+          }
+        }
+      },
+      "ReasonRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "report_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The report this action resolves, if any."
+          }
+        },
+        "additionalProperties": false
+      },
       "RecoverRequest": {
         "type": "object",
         "required": [
@@ -1162,6 +1984,46 @@
           }
         },
         "additionalProperties": false
+      },
+      "ReportDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "target_type",
+          "target_id",
+          "reason",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target_type": {
+            "type": "string"
+          }
+        }
       },
       "ResolveRequest": {
         "type": "object",
@@ -1252,6 +2114,33 @@
             }
           }
         }
+      },
+      "SuspendRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "report_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the suspension ends (RFC 3339). Omit for an indefinite suspension."
+          }
+        },
+        "additionalProperties": false
       },
       "UserDto": {
         "type": "object",

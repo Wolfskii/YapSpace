@@ -75,6 +75,8 @@ pub struct Limits {
     /// Accounts younger than 24 hours: a burst of 3, then one message every 30 seconds.
     pub post_user_new: Bucket<Uuid>,
     pub post_ip: Bucket<IpAddr>,
+    /// Reports per account: 30 a day.
+    pub report: Bucket<Uuid>,
     /// Backstop for every request from one client.
     pub global_ip: Bucket<IpAddr>,
 }
@@ -116,6 +118,13 @@ impl Limits {
                 enabled,
             ),
             post_ip: Bucket::new("post_ip", Quota::per_minute(nz(60)), enabled),
+            report: Bucket::new(
+                "report",
+                Quota::with_period(period(24 * 60 * 60 / 30))
+                    .expect("valid quota")
+                    .allow_burst(nz(30)),
+                enabled,
+            ),
             global_ip: Bucket::new("global_ip", Quota::per_minute(nz(600)), enabled),
         }
     }
@@ -131,6 +140,7 @@ impl Limits {
         self.post_user.retain_recent();
         self.post_user_new.retain_recent();
         self.post_ip.retain_recent();
+        self.report.retain_recent();
         self.global_ip.retain_recent();
     }
 }

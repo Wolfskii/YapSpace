@@ -80,3 +80,13 @@ Newest entry at the bottom. Template:
 - Did: remote set to https://github.com/Wolfskii/YapSpace.git. Repo kept PUBLIC by user choice. Fixed two CI errors: trivy-action tag needed a v prefix, and the release it pinned depended on a missing setup-trivy tag. Now pinned to aquasecurity/trivy-action@v0.36.0.
 - Checks: GitHub CI green on all four jobs (rust, cargo-deny, guards, docker smoke test + Trivy).
 - Still open: P1-11 (Redocly lint, run by the user). Phase 1 gate waits on it.
+
+
+## 2026-10-27 · Session summary (Phases 0 to 5 server side, Phase 4 extension)
+- Done this session: identity rules and 90 vectors (P0-04, P2-08..11); auth, discussions, messages, rate limits, spam checks, admin CLI, authz matrix (P2-01..22); realtime socket with fan-out, resume, gap fill and caps (P3-01..08); browser extension with panel, realtime client, tests and Chrome and Firefox builds (P4-01, 03, 04, 06, 08, 09); reports, moderation, blocks, account deletion and export, retention jobs (P5-02, 03, 05, 06, 07); ADRs (P0-03); release workflow (P5-15).
+- Gates: `task check` green (fmt, clippy, about 150 tests, cargo-deny, extension type check, extension tests, both builds). GitHub CI green on the Phase 1 commit before the Phase 2 to 5 work. Re-run CI after pushing.
+- Gate waiver: the Phase 1 and Phase 2 gates were passed by the user's instruction to keep going, while P1-11 (Redocly lint) is still not run. Run the lint and mark P1-11 DONE.
+- Deviations: the dev database is on port 5433 because another local project owns 5432. Migration 0002 was applied with sqlx-cli because the crate cannot compile before its tables exist. The image is 61.4 MB. `sqlx::test` tests need `DATABASE_URL`.
+- Not built: P3-09 (k6), P4-12 and P4-13 (manual checklist, Playwright), extension UI for reports, blocks and account settings (P4-10, P5-04, P5-05 and P5-06 client parts), P5-09 to P5-13 (need a VPS, domain and backup provider), P5-14 (legal review), P5-16 (sign-off). Phase 6 and 7 are deferred until production data and a product decision exist.
+- Known limitations: TCP reset hides the 1009 and 4004 close codes from the client in tests (the server does close), the slow-consumer 4008 path has no end-to-end test, and rate limits are per process.
+- Next: run `npx @redocly/cli lint docs/api/openapi.json`; check the extension in Chrome with `task api:run` and `task ext:dev`; then decide D-01 and D-02 to unblock the deployment items.

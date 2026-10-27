@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE messages SET body = ''\n         WHERE id IN (\n           SELECT id FROM messages\n           WHERE status = 'removed' AND status_changed_at < $1 AND body <> ''\n           LIMIT $2\n         )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e474c363aa3a0fede888d89b18d4fa83b9ff55311102efda149778669ce96dac"
+}

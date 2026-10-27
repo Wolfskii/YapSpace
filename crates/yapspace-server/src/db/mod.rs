@@ -9,10 +9,14 @@ use sqlx::{
 };
 use tokio_util::sync::CancellationToken;
 
+pub mod account;
 pub mod audit;
+pub mod blocks;
 pub mod credentials;
 pub mod discussions;
 pub mod messages;
+pub mod moderation;
+pub mod reports;
 pub mod sessions;
 pub mod users;
 

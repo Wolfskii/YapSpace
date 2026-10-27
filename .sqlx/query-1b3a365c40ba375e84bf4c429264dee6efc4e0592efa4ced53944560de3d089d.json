@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reports WHERE status <> 'open' AND resolved_at < $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1b3a365c40ba375e84bf4c429264dee6efc4e0592efa4ced53944560de3d089d"
+}

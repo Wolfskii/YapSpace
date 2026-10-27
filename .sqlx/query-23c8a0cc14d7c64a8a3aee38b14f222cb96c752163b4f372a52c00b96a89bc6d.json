@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE messages SET body = '', status = 'deleted', status_changed_at = now()\n         WHERE id IN (\n           SELECT m.id FROM messages m JOIN users u ON u.id = m.author_id\n           WHERE u.status = 'deleted' AND (m.body <> '' OR m.status <> 'deleted')\n           LIMIT $1\n         )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "23c8a0cc14d7c64a8a3aee38b14f222cb96c752163b4f372a52c00b96a89bc6d"
+}

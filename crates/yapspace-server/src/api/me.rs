@@ -2,10 +2,13 @@
 
 use axum::{
     Json,
+    body::{Body, Bytes},
     extract::{Path, State},
-    http::StatusCode,
+    http::{StatusCode, header},
+    response::{IntoResponse, Response},
 };
 use chrono::{DateTime, Utc};
+use futures_util::stream;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -16,8 +19,9 @@ use crate::{
         extractors::{ApiJson, AuthUser},
     },
     app::AppState,
+    db::account::{self, ExportMessage},
     db::{sessions, users},
-    domain::auth as service,
+    domain::{account as account_service, auth as service},
     error::AppError,
 };
 
@@ -180,4 +184,135 @@ pub async fn revoke_session(
     } else {
         Err(AppError::NotFound)
     }
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct DeleteAccountRequest {
+    /// Confirms the deletion. A deleted account cannot be recovered.
+    pub password: String,
+}
+
+/// Deletes the account. Sessions end now, and message bodies are erased within a few minutes by a background job.
+#[utoipa::path(
+    delete,
+    path = "/v1/me",
+    tag = "me",
+    security(("session_token" = [])),
+    request_body = DeleteAccountRequest,
+    responses(
+        (status = 202, description = "Account deletion accepted"),
+        (status = 401, description = "Password is wrong"),
+    )
+)]
+pub async fn delete_account(
+    State(state): State<AppState>,
+    user: AuthUser,
+    ApiJson(body): ApiJson<DeleteAccountRequest>,
+) -> Result<StatusCode, AppError> {
+    account_service::delete(&state, &user, &body.password).await?;
+    Ok(StatusCode::ACCEPTED)
+}
+
+/// Messages per database read during export.
+const EXPORT_BATCH: i64 = 500;
+
+fn export_message(message: &ExportMessage) -> serde_json::Value {
+    serde_json::json!({
+        "id": message.id,
+        "created_at": message.created_at.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+        "discussion": message.discussion_display_url,
+        "seq": message.seq,
+        "body": message.body,
+        "status": message.status,
+        "edited_at": message.edited_at.map(|t| t.to_rfc3339_opts(chrono::SecondsFormat::Millis, true)),
+    })
+}
+
+/// Streams a JSON export of the account: profile, sessions and every message, in batches.
+#[utoipa::path(
+    get,
+    path = "/v1/me/export",
+    tag = "me",
+    security(("session_token" = [])),
+    responses(
+        (status = 200, description = "JSON export", content_type = "application/json"),
+        (status = 401, description = "Not signed in"),
+    )
+)]
+pub async fn export(State(state): State<AppState>, user: AuthUser) -> Result<Response, AppError> {
+    let profile = users::find_by_id(&state.db, user.user_id)
+        .await?
+        .ok_or(AppError::Unauthorized)?;
+    let sessions_rows = sessions::list_for_user(&state.db, user.user_id).await?;
+    let sessions_json: Vec<serde_json::Value> = sessions_rows
+        .iter()
+        .map(|row| {
+            serde_json::json!({
+                "client_label": row.client_label,
+                "created_at": row.created_at.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+                "last_used_at": row.last_used_at.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+            })
+        })
+        .collect();
+    let header = serde_json::json!({
+        "profile": user_dto(&profile),
+        "sessions": sessions_json,
+    })
+    .to_string();
+    // Reopen the object so the messages array can be appended.
+    let opening = format!("{},\"messages\":[", &header[..header.len() - 1]);
+
+    // State: the next cursor, whether the opening was sent, whether a message was written, and whether we are done.
+    let pages = stream::unfold(
+        (state.clone(), user.user_id, Some(opening), None, false, false),
+        |(state, user_id, opening, cursor, wrote_any, done)| async move {
+            if let Some(opening) = opening {
+                return Some((
+                    Ok::<Bytes, std::io::Error>(Bytes::from(opening)),
+                    (state, user_id, None, cursor, wrote_any, done),
+                ));
+            }
+            if done {
+                return None;
+            }
+            match account::export_page(&state.db, user_id, cursor, EXPORT_BATCH).await {
+                Err(err) => {
+                    tracing::error!(error = %err, "export failed part way");
+                    Some((
+                        Err(std::io::Error::other("export failed")),
+                        (state, user_id, None, None, wrote_any, true),
+                    ))
+                }
+                Ok(rows) if rows.is_empty() => Some((
+                    Ok(Bytes::from_static(b"]}")),
+                    (state, user_id, None, None, wrote_any, true),
+                )),
+                Ok(rows) => {
+                    let last = rows.last().map(|m| (m.created_at, m.id));
+                    let mut chunk = String::new();
+                    for (index, message) in rows.iter().enumerate() {
+                        if wrote_any || index > 0 {
+                            chunk.push(',');
+                        }
+                        chunk.push_str(&export_message(message).to_string());
+                    }
+                    Some((Ok(Bytes::from(chunk)), (state, user_id, None, last, true, false)))
+                }
+            }
+        },
+    );
+
+    let mut response = Body::from_stream(pages).into_response();
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        "application/json".parse().expect("static header"),
+    );
+    response.headers_mut().insert(
+        header::CONTENT_DISPOSITION,
+        "attachment; filename=\"yapspace-export.json\""
+            .parse()
+            .expect("static header"),
+    );
+    Ok(response)
 }

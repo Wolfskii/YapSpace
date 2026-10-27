@@ -9,7 +9,12 @@ pub mod slots;
 use axum::extract::ws::Utf8Bytes;
 use uuid::Uuid;
 
-use crate::{api::dto::MessageDto, app::AppState, realtime::protocol::ServerFrame};
+use crate::{
+    api::dto::{DiscussionDto, MessageDto},
+    app::AppState,
+    db::discussions::DiscussionRow,
+    realtime::protocol::ServerFrame,
+};
 
 pub use hub::{Event, EventKind, Hub};
 
@@ -33,6 +38,15 @@ pub fn publish_created(state: &AppState, discussion: Uuid, seq: i64, message: Me
         message,
     };
     publish(state, EventKind::Created, discussion, seq, &frame);
+}
+
+/// Tells live subscribers that a discussion was locked, hidden or otherwise changed.
+pub fn publish_discussion(state: &AppState, row: &DiscussionRow, discussion: DiscussionDto) {
+    let frame = ServerFrame::DiscussionUpdated {
+        discussion_id: row.id,
+        discussion,
+    };
+    publish(state, EventKind::DiscussionUpdated, row.id, row.last_seq, &frame);
 }
 
 /// Announces a change to an existing message, for example a deletion.
