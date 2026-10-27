@@ -12,7 +12,7 @@ Requirements: Rust (the version in `rust-toolchain.toml`), Docker, and [go-task]
 
 ```bash
 task setup          # installs sqlx-cli and cargo-deny
-task dev:db:up      # starts PostgreSQL 18 on 127.0.0.1:5432
+task dev:db:up      # starts PostgreSQL 18 on 127.0.0.1:5433 (5432 may belong to another project)
 cp .env.example .env
 task db:migrate     # applies migrations
 task api:run        # serves on 127.0.0.1:8080, metrics on 127.0.0.1:9090

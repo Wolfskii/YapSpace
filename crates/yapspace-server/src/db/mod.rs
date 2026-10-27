@@ -9,6 +9,11 @@ use sqlx::{
 };
 use tokio_util::sync::CancellationToken;
 
+pub mod audit;
+pub mod credentials;
+pub mod sessions;
+pub mod users;
+
 use crate::config::Config;
 
 /// Migrations are embedded in the binary. Files in `migrations/` are immutable once committed (AGENTS.md).

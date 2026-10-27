@@ -36,6 +36,7 @@ use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
     api,
+    domain::passwords::PasswordHasher,
     config::{Config, Env},
     db,
     error::AppError,
@@ -58,6 +59,8 @@ pub struct AppState {
     pub shutdown: CancellationToken,
     /// Background tasks. Shutdown waits for them, up to the grace period.
     pub tasks: TaskTracker,
+    /// Argon2id hashing with a concurrency limit.
+    pub hasher: Arc<PasswordHasher>,
 }
 
 impl AppState {
@@ -75,6 +78,7 @@ impl AppState {
             config: Arc::new(config),
             shutdown: CancellationToken::new(),
             tasks: TaskTracker::new(),
+            hasher: Arc::new(PasswordHasher::new()),
         }
     }
 

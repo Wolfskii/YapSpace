@@ -1,0 +1,675 @@
+[
+ {
+  "name": "drops utm and www, sorts query",
+  "observed": "https://www.Example.com/a/b/?utm_source=x&z=1&a=2#top",
+  "expect": {
+   "key": "v1|url|example.com/a/b?a=2&z=1",
+   "display_url": "https://example.com/a/b?a=2&z=1"
+  }
+ },
+ {
+  "name": "http and https same identity",
+  "observed": "http://example.com/x",
+  "expect": {
+   "key": "v1|url|example.com/x"
+  }
+ },
+ {
+  "name": "idn punycode",
+  "observed": "https://bücher.de/",
+  "expect": {
+   "key": "v1|url|xn--bcher-kva.de/"
+  }
+ },
+ {
+  "name": "non-default port kept",
+  "observed": "https://example.com:8443/x",
+  "expect": {
+   "key": "v1|url|example.com:8443/x"
+  }
+ },
+ {
+  "name": "default http port dropped",
+  "observed": "http://example.com:80/",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "hash route kept",
+  "observed": "https://app.example.com/#/board/42?tab=1",
+  "expect": {
+   "key": "v1|url|app.example.com/#/board/42"
+  }
+ },
+ {
+  "name": "token fragment dropped",
+  "observed": "https://example.com/cb#access_token=abc",
+  "expect": {
+   "key": "v1|url|example.com/cb"
+  }
+ },
+ {
+  "name": "anchor fragment dropped",
+  "observed": "https://example.com/doc#section-2",
+  "expect": {
+   "key": "v1|url|example.com/doc"
+  }
+ },
+ {
+  "name": "userinfo dropped",
+  "observed": "https://user:pass@example.com/x",
+  "expect": {
+   "key": "v1|url|example.com/x"
+  }
+ },
+ {
+  "name": "sensitive param rejected",
+  "observed": "https://example.com/reset?token=abc",
+  "expect": {
+   "error": "sensitive_parameters"
+  }
+ },
+ {
+  "name": "sensitive param checked case-insensitively",
+  "observed": "https://example.com/?TOKEN=abc",
+  "expect": {
+   "error": "sensitive_parameters"
+  }
+ },
+ {
+  "name": "x-amz prefix rejected",
+  "observed": "https://cdn.example.com/a?x-amz-signature=zz",
+  "expect": {
+   "error": "sensitive_parameters"
+  }
+ },
+ {
+  "name": "semicolon path parameter rejected",
+  "observed": "https://example.com/a;b",
+  "expect": {
+   "error": "sensitive_parameters"
+  }
+ },
+ {
+  "name": "secret-like segment",
+  "observed": "https://example.com/share/aB3dEfGhIjKlMnOpQrStUvWxYz012345",
+  "expect": {
+   "error": "secret_like_token"
+  }
+ },
+ {
+  "name": "secret-like query value",
+  "observed": "https://example.com/?k=aB3dEfGhIjKlMnOpQrStUvWxYz012345",
+  "expect": {
+   "error": "secret_like_token"
+  }
+ },
+ {
+  "name": "commit sha allowed",
+  "observed": "https://github.com/o/r/commit/0123456789abcdef0123456789abcdef01234567",
+  "expect": {
+   "key": "v1|url|github.com/o/r/commit/0123456789abcdef0123456789abcdef01234567"
+  }
+ },
+ {
+  "name": "youtube short link",
+  "observed": "https://youtu.be/dQw4w9WgXcQ?si=abc&t=10",
+  "expect": {
+   "key": "v1|youtube|video:dQw4w9WgXcQ",
+   "display_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  }
+ },
+ {
+  "name": "x status with photo suffix",
+  "observed": "https://twitter.com/jack/status/20/photo/1",
+  "expect": {
+   "key": "v1|x|post:20"
+  }
+ },
+ {
+  "name": "reddit comment maps to post",
+  "observed": "https://old.reddit.com/r/rust/comments/1abcde/title/kxyz12/",
+  "expect": {
+   "key": "v1|reddit|post:1abcde"
+  }
+ },
+ {
+  "name": "hn item",
+  "observed": "https://news.ycombinator.com/item?id=41234567&p=2",
+  "expect": {
+   "key": "v1|hn|item:41234567"
+  }
+ },
+ {
+  "name": "youtube channel page falls through to generic",
+  "observed": "https://www.youtube.com/@somechannel",
+  "expect": {
+   "key": "v1|url|youtube.com/@somechannel"
+  }
+ },
+ {
+  "name": "canonical accepted",
+  "observed": "https://news.example.com/a?ref=home",
+  "canonical": "https://news.example.com/a",
+  "expect": {
+   "candidates": [
+    "v1|canonical|news.example.com/a",
+    "v1|url|news.example.com/a?ref=home"
+   ]
+  }
+ },
+ {
+  "name": "canonical cross-site rejected",
+  "observed": "https://blog.a.com/p",
+  "canonical": "https://evil.com/p",
+  "expect": {
+   "candidates": [
+    "v1|url|blog.a.com/p"
+   ]
+  }
+ },
+ {
+  "name": "canonical to homepage rejected",
+  "observed": "https://a.com/deep/page",
+  "canonical": "https://a.com/",
+  "expect": {
+   "candidates": [
+    "v1|url|a.com/deep/page"
+   ]
+  }
+ },
+ {
+  "name": "canonical same site other subdomain accepted",
+  "observed": "https://blog.example.com/p",
+  "canonical": "https://news.example.com/p",
+  "expect": {
+   "candidates": [
+    "v1|canonical|news.example.com/p",
+    "v1|url|blog.example.com/p"
+   ]
+  }
+ },
+ {
+  "name": "canonical identical to observed ignored",
+  "observed": "https://example.com/a",
+  "canonical": "https://example.com/a/",
+  "expect": {
+   "candidates": [
+    "v1|url|example.com/a"
+   ]
+  }
+ },
+ {
+  "name": "invalid canonical ignored",
+  "observed": "https://example.com/a",
+  "canonical": "not a url",
+  "expect": {
+   "candidates": [
+    "v1|url|example.com/a"
+   ]
+  }
+ },
+ {
+  "name": "canonical to youtube from other site rejected",
+  "observed": "https://news.example.com/a",
+  "canonical": "https://youtu.be/dQw4w9WgXcQ",
+  "expect": {
+   "candidates": [
+    "v1|url|news.example.com/a"
+   ]
+  }
+ },
+ {
+  "name": "ipv4 host rejected",
+  "observed": "http://192.168.1.1/admin",
+  "expect": {
+   "error": "ip_host"
+  }
+ },
+ {
+  "name": "ipv6 host rejected",
+  "observed": "http://[::1]/",
+  "expect": {
+   "error": "ip_host"
+  }
+ },
+ {
+  "name": "localhost rejected",
+  "observed": "http://localhost:3000/",
+  "expect": {
+   "error": "private_host"
+  }
+ },
+ {
+  "name": "dot local rejected",
+  "observed": "https://printer.local/",
+  "expect": {
+   "error": "private_host"
+  }
+ },
+ {
+  "name": "single label host rejected",
+  "observed": "https://intranet/",
+  "expect": {
+   "error": "private_host"
+  }
+ },
+ {
+  "name": "blocked capability host",
+  "observed": "https://docs.google.com/document/d/1x/edit",
+  "expect": {
+   "error": "blocked_host"
+  }
+ },
+ {
+  "name": "blocked parent domain matches subdomain",
+  "observed": "https://x.docs.google.com/doc",
+  "expect": {
+   "error": "blocked_host"
+  }
+ },
+ {
+  "name": "blocked host after www strip",
+  "observed": "https://www.dropbox.com/s/abc",
+  "expect": {
+   "error": "blocked_host"
+  }
+ },
+ {
+  "name": "file scheme",
+  "observed": "file:///C:/x.html",
+  "expect": {
+   "error": "unsupported_scheme"
+  }
+ },
+ {
+  "name": "ftp scheme",
+  "observed": "ftp://example.com/",
+  "expect": {
+   "error": "unsupported_scheme"
+  }
+ },
+ {
+  "name": "not a url",
+  "observed": "not a url",
+  "expect": {
+   "error": "invalid"
+  }
+ },
+ {
+  "name": "uppercase scheme and host lowered, path case kept",
+  "observed": "HTTPS://Example.COM/A",
+  "expect": {
+   "key": "v1|url|example.com/A"
+  }
+ },
+ {
+  "name": "trailing slash removed",
+  "observed": "https://example.com/a/",
+  "expect": {
+   "key": "v1|url|example.com/a"
+  }
+ },
+ {
+  "name": "root keeps its slash",
+  "observed": "https://example.com",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "repeated slashes collapsed",
+  "observed": "https://example.com//a//b",
+  "expect": {
+   "key": "v1|url|example.com/a/b"
+  }
+ },
+ {
+  "name": "only one www label removed",
+  "observed": "https://www.www.example.com/",
+  "expect": {
+   "key": "v1|url|www.example.com/"
+  }
+ },
+ {
+  "name": "www.co keeps its www",
+  "observed": "https://www.co/",
+  "expect": {
+   "key": "v1|url|www.co/"
+  }
+ },
+ {
+  "name": "empty query marker dropped",
+  "observed": "https://example.com/a?",
+  "expect": {
+   "key": "v1|url|example.com/a"
+  }
+ },
+ {
+  "name": "repeated keys kept and sorted",
+  "observed": "https://example.com/?b=2&a=1&a=0",
+  "expect": {
+   "key": "v1|url|example.com/?a=0&a=1&b=2"
+  }
+ },
+ {
+  "name": "plus stays literal",
+  "observed": "https://example.com/?q=a+b",
+  "expect": {
+   "key": "v1|url|example.com/?q=a+b"
+  }
+ },
+ {
+  "name": "all utm parameters removed",
+  "observed": "https://example.com/?utm_a=1&utm_b=2",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "fbclid removed",
+  "observed": "https://example.com/p?fbclid=abc",
+  "expect": {
+   "key": "v1|url|example.com/p"
+  }
+ },
+ {
+  "name": "percent-encoded unreserved decoded",
+  "observed": "https://example.com/%7euser/a%2fb",
+  "expect": {
+   "key": "v1|url|example.com/~user/a%2Fb"
+  }
+ },
+ {
+  "name": "double slash at root collapses",
+  "observed": "https://example.com//",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "query keys sorted",
+  "observed": "https://example.com/?z=1&y=2",
+  "expect": {
+   "key": "v1|url|example.com/?y=2&z=1"
+  }
+ },
+ {
+  "name": "empty value kept",
+  "observed": "https://example.com/?a=",
+  "expect": {
+   "key": "v1|url|example.com/?a="
+  }
+ },
+ {
+  "name": "bare key kept",
+  "observed": "https://example.com/?flag",
+  "expect": {
+   "key": "v1|url|example.com/?flag"
+  }
+ },
+ {
+  "name": "bare keys sorted with others",
+  "observed": "https://example.com/?b&a",
+  "expect": {
+   "key": "v1|url|example.com/?a&b"
+  }
+ },
+ {
+  "name": "fbclid removed case-insensitively",
+  "observed": "https://example.com/?FBCLID=abc",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "gclid removed, other kept",
+  "observed": "https://example.com/p?id=7&gclid=x",
+  "expect": {
+   "key": "v1|url|example.com/p?id=7"
+  }
+ },
+ {
+  "name": "mc_cid removed",
+  "observed": "https://example.com/?mc_cid=1&q=2",
+  "expect": {
+   "key": "v1|url|example.com/?q=2"
+  }
+ },
+ {
+  "name": "_ga removed",
+  "observed": "https://example.com/?_ga=1",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "ref_src removed",
+  "observed": "https://example.com/a?ref_src=twsrc",
+  "expect": {
+   "key": "v1|url|example.com/a"
+  }
+ },
+ {
+  "name": "hash route trailing slash removed",
+  "observed": "https://app.example.com/#/board/42/",
+  "expect": {
+   "key": "v1|url|app.example.com/#/board/42"
+  }
+ },
+ {
+  "name": "bang hash route kept",
+  "observed": "https://app.example.com/#!/inbox",
+  "expect": {
+   "key": "v1|url|app.example.com/#!/inbox"
+  }
+ },
+ {
+  "name": "non-route fragment dropped",
+  "observed": "https://example.com/#top",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "www removed with port kept",
+  "observed": "https://www.example.com:8080/",
+  "expect": {
+   "key": "v1|url|example.com:8080/"
+  }
+ },
+ {
+  "name": "https default port dropped",
+  "observed": "https://example.com:443/",
+  "expect": {
+   "key": "v1|url|example.com/"
+  }
+ },
+ {
+  "name": "trailing dot on host removed",
+  "observed": "https://example.com./a",
+  "expect": {
+   "key": "v1|url|example.com/a"
+  }
+ },
+ {
+  "name": "multi-part suffix keeps subdomain",
+  "observed": "https://shop.example.co.uk/item",
+  "expect": {
+   "key": "v1|url|shop.example.co.uk/item"
+  }
+ },
+ {
+  "name": "percent-encoded utf8 stays uppercase",
+  "observed": "https://example.com/caf%c3%a9",
+  "expect": {
+   "key": "v1|url|example.com/caf%C3%A9"
+  }
+ },
+ {
+  "name": "dot segments resolved by parser",
+  "observed": "https://example.com/a/./b/../c",
+  "expect": {
+   "key": "v1|url|example.com/a/c"
+  }
+ },
+ {
+  "name": "numeric-looking domain is a domain",
+  "observed": "https://1.2.3.example.com/",
+  "expect": {
+   "key": "v1|url|1.2.3.example.com/"
+  }
+ },
+ {
+  "name": "blocked list does not match unrelated suffix",
+  "observed": "https://notdropbox.com/",
+  "expect": {
+   "key": "v1|url|notdropbox.com/"
+  }
+ },
+ {
+  "name": "dot internal rejected",
+  "observed": "https://api.corp.internal/",
+  "expect": {
+   "error": "private_host"
+  }
+ },
+ {
+  "name": "home.arpa rejected",
+  "observed": "https://router.home.arpa/",
+  "expect": {
+   "error": "private_host"
+  }
+ },
+ {
+  "name": "16 char mixed path segment is not secret",
+  "observed": "https://example.com/aB3dEfGhIjKlMnOp",
+  "expect": {
+   "key": "v1|url|example.com/aB3dEfGhIjKlMnOp"
+  }
+ },
+ {
+  "name": "32 lowercase letters is not secret",
+  "observed": "https://example.com/abcdefghijklmnopqrstuvwxyzabcdef",
+  "expect": {
+   "key": "v1|url|example.com/abcdefghijklmnopqrstuvwxyzabcdef"
+  }
+ },
+ {
+  "name": "32 chars with dash and underscore is secret",
+  "observed": "https://example.com/aB3-dEf_GhIjKlMnOpQrStUvWxYz0123",
+  "expect": {
+   "error": "secret_like_token"
+  }
+ },
+ {
+  "name": "youtube with list and index params",
+  "observed": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1&index=2",
+  "expect": {
+   "key": "v1|youtube|video:dQw4w9WgXcQ"
+  }
+ },
+ {
+  "name": "youtube invalid id falls through",
+  "observed": "https://www.youtube.com/watch?v=short",
+  "expect": {
+   "key": "v1|url|youtube.com/watch?v=short"
+  }
+ },
+ {
+  "name": "x profile falls through",
+  "observed": "https://x.com/jack",
+  "expect": {
+   "key": "v1|url|x.com/jack"
+  }
+ },
+ {
+  "name": "x i web status",
+  "observed": "https://x.com/i/web/status/123",
+  "expect": {
+   "key": "v1|x|post:123"
+  }
+ },
+ {
+  "name": "reddit redd.it short link",
+  "observed": "https://redd.it/1abcde",
+  "expect": {
+   "key": "v1|reddit|post:1abcde"
+  }
+ },
+ {
+  "name": "reddit id lowercased",
+  "observed": "https://www.reddit.com/comments/1ABCDE",
+  "expect": {
+   "key": "v1|reddit|post:1abcde"
+  }
+ },
+ {
+  "name": "hn non-numeric id falls through",
+  "observed": "https://news.ycombinator.com/item?id=abc",
+  "expect": {
+   "key": "v1|url|news.ycombinator.com/item?id=abc"
+  }
+ },
+ {
+  "name": "hn front page falls through",
+  "observed": "https://news.ycombinator.com/",
+  "expect": {
+   "key": "v1|url|news.ycombinator.com/"
+  }
+ },
+ {
+  "name": "canonical youtube video on same site",
+  "observed": "https://m.youtube.com/channel/UC",
+  "expect": {
+   "candidates": [
+    "v1|youtube|video:dQw4w9WgXcQ",
+    "v1|url|m.youtube.com/channel/UC"
+   ]
+  },
+  "canonical": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+ },
+ {
+  "name": "canonical equal after tracking removal is ignored",
+  "observed": "https://example.com/a?utm_x=1",
+  "canonical": "https://www.example.com/a",
+  "expect": {
+   "candidates": [
+    "v1|url|example.com/a"
+   ]
+  }
+ },
+ {
+  "name": "canonical keeps non-tracking query on observed",
+  "observed": "https://example.com/p?page=2",
+  "canonical": "https://example.com/p",
+  "expect": {
+   "candidates": [
+    "v1|canonical|example.com/p",
+    "v1|url|example.com/p?page=2"
+   ]
+  }
+ },
+ {
+  "name": "canonical on another path accepted",
+  "observed": "https://example.com/a/b",
+  "canonical": "https://example.com/c",
+  "expect": {
+   "candidates": [
+    "v1|canonical|example.com/c",
+    "v1|url|example.com/a/b"
+   ]
+  }
+ },
+ {
+  "name": "canonical with sensitive param ignored",
+  "observed": "https://example.com/a",
+  "canonical": "https://example.com/a?token=x",
+  "expect": {
+   "candidates": [
+    "v1|url|example.com/a"
+   ]
+  }
+ }
+]
