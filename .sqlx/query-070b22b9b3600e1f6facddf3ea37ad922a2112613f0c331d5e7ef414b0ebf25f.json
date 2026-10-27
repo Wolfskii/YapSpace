@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT password_hash, recovery_code_hash FROM password_credentials WHERE user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "password_hash",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "password_credentials",
+            "name": "password_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "recovery_code_hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "password_credentials",
+            "name": "recovery_code_hash"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "070b22b9b3600e1f6facddf3ea37ad922a2112613f0c331d5e7ef414b0ebf25f"
+}

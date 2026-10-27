@@ -39,9 +39,1256 @@
           }
         }
       }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Signs in with a username and password.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Revokes the session that made the request.",
+        "operationId": "logout",
+        "responses": {
+          "204": {
+            "description": "Signed out"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/auth/recover": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Resets the password with a recovery code. Every session is revoked, and a new recovery code is issued.",
+        "operationId": "recover",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or recovery code"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Creates an account and returns a session and the recovery code (shown once).",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Registration is closed"
+          },
+          "409": {
+            "description": "Username taken"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      }
+    },
+    "/v1/discussions": {
+      "post": {
+        "tags": [
+          "discussions"
+        ],
+        "summary": "Creates the discussion for a page, or returns the existing one (200).",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDiscussionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Already existed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscussionDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscussionDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "Account suspended"
+          },
+          "422": {
+            "description": "URL not supported"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/discussions/resolve": {
+      "post": {
+        "tags": [
+          "discussions"
+        ],
+        "summary": "Looks up the discussion for a page. This never creates one.",
+        "operationId": "resolve",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Identity and the discussion if one exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "URL not supported"
+          }
+        }
+      }
+    },
+    "/v1/discussions/{id}": {
+      "get": {
+        "tags": [
+          "discussions"
+        ],
+        "summary": "Reads a discussion. A merged discussion returns its target, and `merged_from` names the id that was asked for.",
+        "operationId": "get_discussion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The discussion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscussionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/discussions/{id}/messages": {
+      "get": {
+        "tags": [
+          "messages"
+        ],
+        "summary": "Reads a page of messages.",
+        "operationId": "list_messages",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before_seq",
+            "in": "path",
+            "description": "Return messages with a seq below this value (older messages).",
+            "required": true,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64"
+            }
+          },
+          {
+            "name": "after_seq",
+            "in": "path",
+            "description": "Return messages with a seq above this value (newer messages).",
+            "required": true,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "description": "1-100, default 50.",
+            "required": true,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad cursor or limit"
+          },
+          "404": {
+            "description": "No such discussion"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "messages"
+        ],
+        "summary": "Posts a message. Send the same `client_msg_id` again to retry. A retry returns the stored message with 200.",
+        "operationId": "post_message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Discussion id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Already posted with this client_msg_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Posted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "Account suspended or discussion locked"
+          },
+          "404": {
+            "description": "No such discussion"
+          },
+          "422": {
+            "description": "Validation failed or invalid parent"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "The signed-in user's profile.",
+        "operationId": "get_me",
+        "responses": {
+          "200": {
+            "description": "Own profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/password": {
+      "post": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Changes the password. Every other session is revoked, and the current one stays signed in.",
+        "operationId": "change_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Password changed"
+          },
+          "401": {
+            "description": "Current password is wrong"
+          },
+          "422": {
+            "description": "New password is invalid"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/recovery-code": {
+      "post": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Replaces the recovery code. The password must be confirmed first.",
+        "operationId": "rotate_recovery_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurrentPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "New recovery code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Current password is wrong"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/sessions": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Lists the active sessions, most recently used first.",
+        "operationId": "list_sessions",
+        "responses": {
+          "200": {
+            "description": "Active sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/me/sessions/{id}": {
+      "delete": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Revokes one of your own sessions. Someone else's session id returns 404, so ids cannot be probed.",
+        "operationId": "revoke_session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Session id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Session revoked"
+          },
+          "404": {
+            "description": "No such session"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/messages/{id}": {
+      "get": {
+        "tags": [
+          "messages"
+        ],
+        "summary": "Reads one message.",
+        "operationId": "get_message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Message id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such message"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "messages"
+        ],
+        "summary": "Deletes your own message. The body is erased and the message becomes a tombstone, so replies stay valid.",
+        "operationId": "delete_message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Message id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted (or already deleted)"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such message, or it is not yours"
+          }
+        },
+        "security": [
+          {
+            "session_token": []
+          }
+        ]
+      }
+    },
+    "/v1/users/{username}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "A public profile: id, username and creation time.",
+        "operationId": "get_user",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username, case-insensitive",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicUserDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such user"
+          }
+        }
+      }
     }
   },
   "components": {
+    "schemas": {
+      "AuthResponse": {
+        "type": "object",
+        "description": "Returned by register, login and recovery. `recovery_code` is shown once, on register and recovery only.",
+        "required": [
+          "user",
+          "session_token"
+        ],
+        "properties": {
+          "recovery_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        }
+      },
+      "AuthorDto": {
+        "type": "object",
+        "description": "Author of a message. `null` when the author's account has been deleted.",
+        "required": [
+          "id",
+          "username"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "properties": {
+          "current_password": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateDiscussionRequest": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "canonical_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CurrentPasswordRequest": {
+        "type": "object",
+        "required": [
+          "current_password"
+        ],
+        "properties": {
+          "current_password": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DiscussionDto": {
+        "type": "object",
+        "description": "A discussion. `merged_from` is set when the requested id was merged into this discussion.",
+        "required": [
+          "id",
+          "display_url",
+          "site",
+          "status",
+          "message_count",
+          "last_seq",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "display_url": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "merged_from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "message_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "site": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "IdentityDto": {
+        "type": "object",
+        "description": "The identity a page resolved to. This is shown in the panel, so users can check which discussion they are on.",
+        "required": [
+          "kind",
+          "display_url",
+          "site",
+          "ruleset"
+        ],
+        "properties": {
+          "display_url": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "`url`, `canonical`, or `adapter`."
+          },
+          "ruleset": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "site": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "client_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageDto": {
+        "type": "object",
+        "description": "A message. `body` is `null` unless the message is visible, so removed and deleted text never leaves the server.",
+        "required": [
+          "id",
+          "discussion_id",
+          "seq",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "author": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "discussion_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "edited_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parent": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ParentDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "MessagePage": {
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageDto"
+            },
+            "description": "Ascending by seq."
+          },
+          "next_after_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "next_before_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "ParentDto": {
+        "type": "object",
+        "description": "The message a reply points to. The excerpt and author are hidden when that message is not visible.",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "author_username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "excerpt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PostMessageRequest": {
+        "type": "object",
+        "required": [
+          "body",
+          "client_msg_id"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "1-2000 characters. Line breaks are kept."
+          },
+          "client_msg_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Client-generated id, reused on retries so a message is never stored twice."
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The message this one replies to. It must be visible and in the same discussion."
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicUserDto": {
+        "type": "object",
+        "description": "A user as other people see them. No role and no status.",
+        "required": [
+          "id",
+          "username",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "RecoverRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "recovery_code",
+          "new_password"
+        ],
+        "properties": {
+          "client_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "new_password": {
+            "type": "string"
+          },
+          "recovery_code": {
+            "type": "string",
+            "description": "The recovery code, in any case, with or without dashes."
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecoveryCodeResponse": {
+        "type": "object",
+        "required": [
+          "recovery_code"
+        ],
+        "properties": {
+          "recovery_code": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "client_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Shown in the session list, for example \"Chrome extension\"."
+          },
+          "password": {
+            "type": "string",
+            "description": "10-128 characters. Must not equal the username.",
+            "example": "correct horse battery"
+          },
+          "username": {
+            "type": "string",
+            "description": "3-24 characters: a-z, 0-9 or _. Case-insensitive.",
+            "example": "alice_01"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResolveRequest": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "canonical_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The page's `<link rel=\"canonical\">`, if it has one."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL the browser is showing.",
+            "example": "https://example.com/article?utm_source=x"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResolveResponse": {
+        "type": "object",
+        "required": [
+          "identity"
+        ],
+        "properties": {
+          "discussion": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DiscussionDto",
+                "description": "`null` when nobody has started a discussion for this page yet."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identity": {
+            "$ref": "#/components/schemas/IdentityDto"
+          }
+        }
+      },
+      "SessionDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "last_used_at",
+          "current"
+        ],
+        "properties": {
+          "client_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "True for the session that made this request."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_used_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SessionListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionDto"
+            }
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "description": "The signed-in user's own profile.",
+        "required": [
+          "id",
+          "username",
+          "role",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "session_token": {
         "type": "http",

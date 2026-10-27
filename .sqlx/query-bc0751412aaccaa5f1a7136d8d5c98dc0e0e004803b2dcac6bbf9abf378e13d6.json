@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE discussions SET last_seq = 30, message_count = 30, last_message_at = now() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bc0751412aaccaa5f1a7136d8d5c98dc0e0e004803b2dcac6bbf9abf378e13d6"
+}

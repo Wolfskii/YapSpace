@@ -201,17 +201,18 @@ pub fn normalize_percent(input: &str) -> String {
     let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
     let mut i = 0;
     while i < bytes.len() {
-        if bytes[i] == b'%' && i + 2 < bytes.len() {
-            if let (Some(hi), Some(lo)) = (hex_value(bytes[i + 1]), hex_value(bytes[i + 2])) {
-                let byte = hi * 16 + lo;
-                if is_unreserved(byte) {
-                    out.push(byte);
-                } else {
-                    out.extend_from_slice(format!("%{:02X}", byte).as_bytes());
-                }
-                i += 3;
-                continue;
+        if bytes[i] == b'%'
+            && i + 2 < bytes.len()
+            && let (Some(hi), Some(lo)) = (hex_value(bytes[i + 1]), hex_value(bytes[i + 2]))
+        {
+            let byte = hi * 16 + lo;
+            if is_unreserved(byte) {
+                out.push(byte);
+            } else {
+                out.extend_from_slice(format!("%{:02X}", byte).as_bytes());
             }
+            i += 3;
+            continue;
         }
         out.push(bytes[i]);
         i += 1;

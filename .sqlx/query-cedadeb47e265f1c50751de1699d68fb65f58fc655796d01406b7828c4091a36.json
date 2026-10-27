@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE discussions\n         SET last_seq = last_seq + 1, message_count = message_count + 1, last_message_at = now()\n         WHERE id = $1 AND status = 'open' AND merged_into_id IS NULL\n         RETURNING last_seq",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "last_seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cedadeb47e265f1c50751de1699d68fb65f58fc655796d01406b7828c4091a36"
+}

@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO discussion_identities (key_hash, key, discussion_id, ruleset, kind)\n         VALUES ($1, $2, $3, 1, $4)\n         ON CONFLICT (key_hash) DO NOTHING\n         RETURNING discussion_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "discussion_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "discussion_identities",
+            "name": "discussion_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "347f10a569a713e0a927d0510a3106fad9328c23ff8a0ecf457c1ac7c973c79b"
+}

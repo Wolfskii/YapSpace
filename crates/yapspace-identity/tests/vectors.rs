@@ -38,18 +38,18 @@ fn every_vector_matches_its_expectation() {
                 continue;
             }
         };
-        if let Some(key) = expect.get("key").and_then(Value::as_str) {
-            if list[0].key != key {
-                failures.push(format!("{name}: key {:?} != {key:?}", list[0].key));
-            }
+        if let Some(key) = expect.get("key").and_then(Value::as_str)
+            && list[0].key != key
+        {
+            failures.push(format!("{name}: key {:?} != {key:?}", list[0].key));
         }
-        if let Some(display) = expect.get("display_url").and_then(Value::as_str) {
-            if list[0].display_url != display {
-                failures.push(format!(
-                    "{name}: display {:?} != {display:?}",
-                    list[0].display_url
-                ));
-            }
+        if let Some(display) = expect.get("display_url").and_then(Value::as_str)
+            && list[0].display_url != display
+        {
+            failures.push(format!(
+                "{name}: display {:?} != {display:?}",
+                list[0].display_url
+            ));
         }
         if let Some(expected) = expect.get("candidates").and_then(Value::as_array) {
             let actual: Vec<&str> = list.iter().map(|c| c.key.as_str()).collect();

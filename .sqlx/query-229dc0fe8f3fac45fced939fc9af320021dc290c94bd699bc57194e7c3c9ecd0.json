@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO discussions (id, display_url, site, title, created_by)\n             VALUES ($1, $2, 'example.com', $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "229dc0fe8f3fac45fced939fc9af320021dc290c94bd699bc57194e7c3c9ecd0"
+}

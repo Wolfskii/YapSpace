@@ -1,0 +1,136 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, display_url, site, title, status, merged_into_id, last_seq, message_count,\n                created_at, last_message_at\n         FROM discussions WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "display_url"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "site",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "merged_into_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "merged_into_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "last_seq"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "message_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "message_count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "last_message_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "discussions",
+            "name": "last_message_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2759f17567c6d22f9643baf106a05fc7338de5ba8e1bb8d12b66814c4d6dcb4c"
+}

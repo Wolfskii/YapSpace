@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO password_credentials (user_id, password_hash, recovery_code_hash)\n             VALUES ($1, $2, $3) ON CONFLICT (user_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c07c70bb522eb1d95b98cfd1ba54d2e07f14e879dda8e1d14101f16b7a45c64"
+}

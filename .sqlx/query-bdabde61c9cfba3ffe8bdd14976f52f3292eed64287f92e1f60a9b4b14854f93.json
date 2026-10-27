@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE messages SET status = 'deleted', body = '', status_changed_at = now()\n         WHERE id = $1 AND author_id = $2 AND status <> 'deleted'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bdabde61c9cfba3ffe8bdd14976f52f3292eed64287f92e1f60a9b4b14854f93"
+}

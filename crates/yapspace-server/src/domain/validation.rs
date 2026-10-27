@@ -58,7 +58,7 @@ pub fn validate_password(password: &str, username: &str) -> Result<(), FieldErro
     if !(MIN_PASSWORD_LEN..=MAX_PASSWORD_LEN).contains(&len) {
         return Err(FieldError::new("password", "length", "must be 10-128 characters"));
     }
-    if password.to_ascii_lowercase() == username.to_ascii_lowercase() {
+    if password.eq_ignore_ascii_case(username) {
         return Err(FieldError::new(
             "password",
             "matches_username",

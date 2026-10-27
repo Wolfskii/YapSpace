@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO discussion_identities (key_hash, key, discussion_id, ruleset, kind)\n             VALUES ($1, $2, $3, 1, 'url')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6e40d1f57b42a6a7550637edd0437721bf306fbe197fb8191769aaa49704d4c1"
+}
