@@ -107,7 +107,7 @@ See [decisions.md](decisions.md). D-01 to D-07 do not block Phases 1–4.
 | P0-01 | Save the plan into the repo | Must | — | DONE | 2026-10-26 |  |
 | P0-02 | Architecture diagrams check | Should | P0-01 | TODO |  | parallel-OK |
 | P0-03 | Write ADRs 0001–0015 | Must | P0-01 | TODO |  | parallel-OK |
-| P0-04 | URL identity test vectors | Must | P0-01 | TODO |  | parallel-OK |
+| P0-04 | URL identity test vectors | Must | P0-01 | DONE | 2026-10-27 | 90 vectors, all pass |
 | P0-05 | Decisions log | Must | P0-01 | DONE | 2026-10-26 |  |
 
 Phase gate: OPEN
@@ -127,7 +127,7 @@ Phase gate: OPEN
 | P1-08 | Integration test harness | Must | P1-07 | DONE | 2026-10-26 |  |
 | P1-09 | Dockerfile + image healthcheck | Must | P1-07 | DONE | 2026-10-26 | Image 61.4 MB vs 60 MB target (accepted; distroless base + binary) |
 | P1-10 | CI workflow | Must | P1-08, P1-09 | DONE | 2026-10-26 | Green on GitHub (run 40343336742 at 8667ef9); repo is public (kept by user choice) |
-| P1-11 | OpenAPI skeleton + docs UI | Must | P1-06 | IN_REVIEW | 2026-10-26 | Redocly lint not run (blocked); run `npx @redocly/cli lint docs/api/openapi.json` once |
+| P1-11 | OpenAPI skeleton + docs UI | Must | P1-06 | IN_REVIEW | 2026-10-27 | Redocly lint not run yet (see P2-21) |
 
 Phase gate: OPEN
 
@@ -136,28 +136,28 @@ Phase gate: OPEN
 
 | ID | Title | Pri | Deps | Status | Updated | Notes |
 |----|-------|-----|------|--------|---------|-------|
-| P2-01 | Validation helpers | Must | P1-08 | TODO |  |  |
-| P2-02 | Password hashing & tokens | Must | P2-01 | TODO |  |  |
-| P2-03 | Sessions + auth extractors | Must | P2-02 | TODO |  |  |
-| P2-04 | Register | Must | P2-03 | TODO |  |  |
-| P2-05 | Login / logout | Must | P2-04 | TODO |  |  |
-| P2-06 | Me endpoints | Must | P2-05 | TODO |  |  |
-| P2-07 | Account recovery | Must | P2-06 | TODO |  |  |
-| P2-08 | Identity crate: generic normalization | Must | P0-04, P1-02 | TODO |  |  |
-| P2-09 | Identity crate: privacy rules completeness | Must | P2-08 | TODO |  |  |
-| P2-10 | Identity crate: site adapters | Must | P2-08 | TODO |  |  |
-| P2-11 | Identity crate: resolution candidates | Must | P2-09, P2-10 | TODO |  |  |
-| P2-12 | Resolve endpoint | Must | P2-11, P2-03 | TODO |  |  |
-| P2-13 | Create discussion | Must | P2-12 | TODO |  |  |
-| P2-14 | Get discussion | Must | P2-13 | TODO |  |  |
-| P2-15 | Post message | Must | P2-14 | TODO |  |  |
-| P2-16 | List messages (pagination) | Must | P2-15 | TODO |  |  |
-| P2-17 | Single message + author delete | Must | P2-16 | TODO |  |  |
-| P2-18 | Rate limiting + client IP | Must | P2-17 | TODO |  |  |
-| P2-19 | Duplicate-message guard | Should | P2-18 | TODO |  |  |
-| P2-20 | Admin CLI | Must | P2-06 | TODO |  |  |
-| P2-21 | OpenAPI completeness + API doc | Must | P2-17 | TODO |  |  |
-| P2-22 | Authorization matrix + hardening tests | Must | P2-21 | TODO |  |  |
+| P2-01 | Validation helpers | Must | P1-08 | IN_REVIEW | 2026-10-27 | Validation tests: 10 test functions, below the 25 unit cases the plan asks for |
+| P2-02 | Password hashing & tokens | Must | P2-01 | DONE | 2026-10-27 |  |
+| P2-03 | Sessions + auth extractors | Must | P2-02 | DONE | 2026-10-27 |  |
+| P2-04 | Register | Must | P2-03 | DONE | 2026-10-27 |  |
+| P2-05 | Login / logout | Must | P2-04 | DONE | 2026-10-27 |  |
+| P2-06 | Me endpoints | Must | P2-05 | DONE | 2026-10-27 |  |
+| P2-07 | Account recovery | Must | P2-06 | DONE | 2026-10-27 |  |
+| P2-08 | Identity crate: generic normalization | Must | P0-04, P1-02 | DONE | 2026-10-27 |  |
+| P2-09 | Identity crate: privacy rules completeness | Must | P2-08 | DONE | 2026-10-27 |  |
+| P2-10 | Identity crate: site adapters | Must | P2-08 | DONE | 2026-10-27 |  |
+| P2-11 | Identity crate: resolution candidates | Must | P2-09, P2-10 | DONE | 2026-10-27 |  |
+| P2-12 | Resolve endpoint | Must | P2-11, P2-03 | DONE | 2026-10-27 |  |
+| P2-13 | Create discussion | Must | P2-12 | DONE | 2026-10-27 |  |
+| P2-14 | Get discussion | Must | P2-13 | DONE | 2026-10-27 |  |
+| P2-15 | Post message | Must | P2-14 | DONE | 2026-10-27 |  |
+| P2-16 | List messages (pagination) | Must | P2-15 | DONE | 2026-10-27 |  |
+| P2-17 | Single message + author delete | Must | P2-16 | DONE | 2026-10-27 |  |
+| P2-18 | Rate limiting + client IP | Must | P2-17 | DONE | 2026-10-27 | Per-process limits, documented for P6-02 |
+| P2-19 | Duplicate-message guard | Should | P2-18 | DONE | 2026-10-27 | Duplicate guard and new-account discussion cap |
+| P2-20 | Admin CLI | Must | P2-06 | DONE | 2026-10-27 |  |
+| P2-21 | OpenAPI completeness + API doc | Must | P2-17 | IN_REVIEW | 2026-10-27 | Redocly lint not run yet |
+| P2-22 | Authorization matrix + hardening tests | Must | P2-21 | DONE | 2026-10-27 |  |
 
 Phase gate: OPEN
 

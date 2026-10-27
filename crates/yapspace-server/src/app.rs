@@ -41,6 +41,7 @@ use crate::{
     domain::passwords::PasswordHasher,
     error::AppError,
     ratelimit::Limits,
+    realtime::{Hub, slots::WsCounters},
     spam::SpamGuard,
     telemetry,
 };
@@ -67,6 +68,10 @@ pub struct AppState {
     pub limits: Arc<Limits>,
     /// Duplicate and new-account spam checks.
     pub spam: Arc<SpamGuard>,
+    /// Fan-out of events to open WebSockets.
+    pub hub: Hub,
+    /// Open WebSocket counts per address, per account and in total.
+    pub ws: Arc<WsCounters>,
 }
 
 impl AppState {
@@ -80,6 +85,7 @@ impl AppState {
     /// Builds the state around an existing pool. Tests use this with the pool that `sqlx::test` provides.
     pub fn with_pool(config: Config, db: PgPool) -> Self {
         let config_enabled = config.rate_limit_enabled;
+        let ws_max = config.ws_max_connections;
         Self {
             db,
             config: Arc::new(config),
@@ -88,6 +94,8 @@ impl AppState {
             hasher: Arc::new(PasswordHasher::new()),
             limits: Arc::new(Limits::new(config_enabled)),
             spam: Arc::new(SpamGuard::new()),
+            hub: Hub::new(),
+            ws: Arc::new(WsCounters::new(ws_max)),
         }
     }
 
@@ -113,13 +121,18 @@ pub fn build_router(state: AppState) -> Router {
                 }),
             );
     }
-    app.layer(CompressionLayer::new())
+    // REST gets compression, a timeout and a body limit. The WebSocket route must not get the timeout (it is open for
+    // a long time), so it is merged in after those layers.
+    let rest = app
+        .layer(CompressionLayer::new())
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             REQUEST_TIMEOUT,
         ))
         .layer(RequestBodyLimitLayer::new(MAX_BODY_BYTES))
-        .fallback(not_found)
+        .fallback(not_found);
+    let realtime = Router::new().route("/v1/realtime", get(api::realtime::connect));
+    rest.merge(realtime)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(request_span)

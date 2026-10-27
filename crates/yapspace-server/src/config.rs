@@ -35,6 +35,10 @@ pub struct Config {
     pub rate_limit_enabled: bool,
     pub extra_blocked_hosts: Vec<String>,
     pub shutdown_grace: Duration,
+    /// How often the server pings a WebSocket (realtime.md §G.3).
+    pub ws_heartbeat: Duration,
+    /// A socket with no inbound frame for this long is closed with 4004.
+    pub ws_idle_timeout: Duration,
 }
 
 // Hand-written so the database URL (which contains the password) never shows up in logs or panics.
@@ -54,6 +58,8 @@ impl fmt::Debug for Config {
             .field("rate_limit_enabled", &self.rate_limit_enabled)
             .field("extra_blocked_hosts", &self.extra_blocked_hosts)
             .field("shutdown_grace", &self.shutdown_grace)
+            .field("ws_heartbeat", &self.ws_heartbeat)
+            .field("ws_idle_timeout", &self.ws_idle_timeout)
             .finish()
     }
 }
@@ -139,6 +145,8 @@ impl Config {
             rate_limit_enabled: parse_bool_or(&get, "YAPSPACE_RATE_LIMIT_ENABLED", true)?,
             extra_blocked_hosts: list(&get, "YAPSPACE_EXTRA_BLOCKED_HOSTS")?,
             shutdown_grace: Duration::from_secs(parse_or(&get, "YAPSPACE_SHUTDOWN_GRACE_SECS", 20u64)?),
+            ws_heartbeat: Duration::from_secs(parse_or(&get, "YAPSPACE_WS_HEARTBEAT_SECS", 25u64)?),
+            ws_idle_timeout: Duration::from_secs(parse_or(&get, "YAPSPACE_WS_IDLE_SECS", 75u64)?),
         })
         .and_then(validate)
     }

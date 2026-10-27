@@ -5,7 +5,7 @@ use std::net::IpAddr;
 use uuid::Uuid;
 
 use crate::{
-    api::extractors::AuthUser,
+    api::{dto::message_dto, extractors::AuthUser},
     app::AppState,
     db::{
         discussions,
@@ -148,12 +148,14 @@ pub async fn post(
     }
     tx.commit().await?;
 
-    // Realtime publish happens here, after commit (realtime.md §G.3). Added in Phase 3.
     state.spam.remember(author.user_id, &body);
     metrics::counter!("messages_created_total").increment(1);
 
+    let message = load(state, id).await?;
+    // Publish after commit, so subscribers never see a message that could still roll back (realtime.md §G.3).
+    crate::realtime::publish_created(state, discussion_id, seq, message_dto(&message));
     Ok(Posted {
-        message: load(state, id).await?,
+        message,
         created: true,
     })
 }
@@ -237,5 +239,7 @@ pub async fn delete(state: &AppState, author: &AuthUser, id: Uuid) -> Result<(),
         return Err(AppError::NotFound);
     }
     messages::delete_by_author(&state.db, id, author.user_id).await?;
+    let updated = load(state, id).await?;
+    crate::realtime::publish_updated(state, updated.discussion_id, updated.seq, message_dto(&updated));
     Ok(())
 }

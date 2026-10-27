@@ -13,6 +13,7 @@ pub mod health;
 pub mod me;
 pub mod messages;
 pub mod openapi;
+pub mod realtime;
 pub mod users;
 
 /// Every route. Each handler registers its path in the OpenAPI document through `routes!`.
