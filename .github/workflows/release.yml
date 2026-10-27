@@ -53,7 +53,9 @@ jobs:
           cache-dependency-path: extension/package-lock.json
       - name: Install
         working-directory: extension
-        run: npm ci --no-audit --no-fund
+        run: |
+          npm ci --no-audit --no-fund
+          npx wxt prepare
       - name: Check and test
         working-directory: extension
         run: |

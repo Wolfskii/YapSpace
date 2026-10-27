@@ -68,7 +68,7 @@ tasks:
   ext:install:
     desc: Install extension dependencies from the lockfile
     dir: extension
-    cmds: [npm ci --no-audit --no-fund]
+    cmds: [npm ci --no-audit --no-fund, npx wxt prepare]
 
   ext:types:
     desc: Regenerate extension API types from docs/api/openapi.json
