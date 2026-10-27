@@ -11,6 +11,7 @@ pub mod dto;
 pub mod extractors;
 pub mod health;
 pub mod me;
+pub mod messages;
 pub mod openapi;
 pub mod users;
 
@@ -32,4 +33,6 @@ pub fn router() -> OpenApiRouter<AppState> {
         .routes(routes!(discussions::resolve))
         .routes(routes!(discussions::create))
         .routes(routes!(discussions::get_discussion))
+        .routes(routes!(messages::list_messages, messages::post_message))
+        .routes(routes!(messages::get_message, messages::delete_message))
 }

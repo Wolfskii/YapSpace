@@ -176,3 +176,22 @@ where
         Ok(Self(user))
     }
 }
+
+/// Query string extractor with problem+json errors (api.md §F.1), like `ApiJson`.
+#[derive(Debug)]
+pub struct ApiQuery<T>(pub T);
+
+impl<S, T> FromRequestParts<S> for ApiQuery<T>
+where
+    S: Send + Sync,
+    T: DeserializeOwned,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        axum::extract::Query::<T>::from_request_parts(parts, state)
+            .await
+            .map(|axum::extract::Query(value)| Self(value))
+            .map_err(|err| AppError::BadRequest(err.to_string()))
+    }
+}

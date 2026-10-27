@@ -121,3 +121,71 @@ pub fn discussion_dto(
         merged_from,
     }
 }
+
+/// Author of a message. `null` when the author's account has been deleted.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct AuthorDto {
+    pub id: Uuid,
+    pub username: String,
+}
+
+/// The message a reply points to. The excerpt and author are hidden when that message is not visible.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct ParentDto {
+    pub id: Uuid,
+    pub seq: Option<i64>,
+    pub author_username: Option<String>,
+    pub excerpt: Option<String>,
+    pub status: String,
+}
+
+/// A message. `body` is `null` unless the message is visible, so removed and deleted text never leaves the server.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MessageDto {
+    pub id: Uuid,
+    pub discussion_id: Uuid,
+    pub seq: i64,
+    pub author: Option<AuthorDto>,
+    pub parent: Option<ParentDto>,
+    pub body: Option<String>,
+    pub status: String,
+    #[serde(with = "rfc3339_ms")]
+    #[schema(value_type = String, format = DateTime)]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "rfc3339_ms_opt")]
+    #[schema(value_type = Option<String>, format = DateTime)]
+    pub edited_at: Option<DateTime<Utc>>,
+}
+
+pub fn message_dto(row: &crate::db::messages::MessageRow) -> MessageDto {
+    let visible = row.status == "visible";
+    let parent_visible = row.parent_status.as_deref() == Some("visible");
+    MessageDto {
+        id: row.id,
+        discussion_id: row.discussion_id,
+        seq: row.seq,
+        author: (row.author_status != "deleted").then(|| AuthorDto {
+            id: row.author_id,
+            username: row.author_username.clone(),
+        }),
+        parent: row.parent_id.map(|id| ParentDto {
+            id,
+            seq: row.parent_seq,
+            author_username: if parent_visible {
+                row.parent_author_username.clone()
+            } else {
+                None
+            },
+            excerpt: if parent_visible {
+                row.parent_excerpt.clone()
+            } else {
+                None
+            },
+            status: row.parent_status.clone().unwrap_or_else(|| "deleted".into()),
+        }),
+        body: visible.then(|| row.body.clone()),
+        status: row.status.clone(),
+        created_at: row.created_at,
+        edited_at: row.edited_at,
+    }
+}
