@@ -33,6 +33,7 @@ pub struct PostMessageRequest {
 }
 
 #[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListMessagesQuery {
     /// Return messages with a seq below this value (older messages).
     pub before_seq: Option<i64>,

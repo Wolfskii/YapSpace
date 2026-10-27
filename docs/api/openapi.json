@@ -323,40 +323,31 @@
           },
           {
             "name": "before_seq",
-            "in": "path",
+            "in": "query",
             "description": "Return messages with a seq below this value (older messages).",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
+              "type": "integer",
               "format": "int64"
             }
           },
           {
             "name": "after_seq",
-            "in": "path",
+            "in": "query",
             "description": "Return messages with a seq above this value (newer messages).",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
+              "type": "integer",
               "format": "int64"
             }
           },
           {
             "name": "limit",
-            "in": "path",
+            "in": "query",
             "description": "1-100, default 50.",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": [
-                "integer",
-                "null"
-              ],
+              "type": "integer",
               "format": "int64"
             }
           }
