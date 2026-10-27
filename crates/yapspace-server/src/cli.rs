@@ -37,11 +37,19 @@ pub enum Command {
 pub enum AdminCommand {
     /// Change a user's role.
     SetRole {
-        /// Username (lowercase).
+        /// Username, case-insensitive.
         username: String,
         /// New role.
         role: Role,
     },
+    /// Revoke sessions. Every session is revoked unless --user is given.
+    RevokeAllSessions {
+        /// Only this user's sessions.
+        #[arg(long)]
+        user: Option<String>,
+    },
+    /// Create demo users, discussions and messages. Refused when YAPSPACE_ENV=prod.
+    SeedDev,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
@@ -49,4 +57,14 @@ pub enum Role {
     User,
     Moderator,
     Admin,
+}
+
+impl Role {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::User => "user",
+            Self::Moderator => "moderator",
+            Self::Admin => "admin",
+        }
+    }
 }

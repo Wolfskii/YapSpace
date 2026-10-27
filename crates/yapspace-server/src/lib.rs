@@ -1,5 +1,6 @@
 //! Holds the YapSpace HTTP/WS server, its domain logic, and the admin CLI.
 
+pub mod admin;
 pub mod api;
 pub mod app;
 pub mod cli;

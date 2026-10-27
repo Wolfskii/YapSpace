@@ -4,6 +4,7 @@ use std::path::Path;
 
 use clap::Parser;
 use yapspace_server::{
+    admin,
     api::openapi as api_openapi,
     app::{self, AppState},
     cli::{AdminCommand, Cli, Command},
@@ -19,9 +20,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Healthcheck => healthcheck().await,
         Command::Migrate => migrate().await,
         Command::Openapi { out } => openapi(&out),
-        Command::Admin {
-            command: AdminCommand::SetRole { .. },
-        } => not_implemented("admin set-role"),
+        Command::Admin { command } => admin(command).await,
     }
 }
 
@@ -74,7 +73,30 @@ fn openapi(out: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn not_implemented(name: &str) -> anyhow::Result<()> {
-    eprintln!("yapspace {name}: not implemented yet");
-    std::process::exit(1);
+async fn admin(command: AdminCommand) -> anyhow::Result<()> {
+    let config = match Config::from_env() {
+        Ok(config) => config,
+        Err(err) => {
+            eprintln!("yapspace admin: {err}");
+            std::process::exit(2);
+        }
+    };
+    let pool = db::pool(&config)?;
+    match command {
+        AdminCommand::SetRole { username, role } => {
+            admin::set_role(&pool, &username, role.as_str()).await?;
+            println!("{username} is now {}", role.as_str());
+        }
+        AdminCommand::RevokeAllSessions { user } => {
+            let revoked = admin::revoke_all_sessions(&pool, user.as_deref()).await?;
+            println!("revoked {revoked} session(s)");
+        }
+        AdminCommand::SeedDev => {
+            let hasher = yapspace_server::domain::passwords::PasswordHasher::new();
+            admin::seed_dev(&pool, &config, &hasher).await?;
+            println!("seeded: alice, bob and mod (password password123!), three discussions");
+        }
+    }
+    pool.close().await;
+    Ok(())
 }
