@@ -106,7 +106,7 @@ See [decisions.md](decisions.md). D-01 to D-07 do not block Phases 1–4.
 |----|-------|-----|------|--------|---------|-------|
 | P0-01 | Save the plan into the repo | Must | — | DONE | 2026-10-26 |  |
 | P0-02 | Architecture diagrams check | Should | P0-01 | TODO |  | parallel-OK |
-| P0-03 | Write ADRs 0001–0015 | Must | P0-01 | TODO |  | parallel-OK |
+| P0-03 | Write ADRs 0001–0015 | Must | P0-01 | DONE |  | parallel-OK |
 | P0-04 | URL identity test vectors | Must | P0-01 | DONE | 2026-10-27 | 90 vectors, all pass |
 | P0-05 | Decisions log | Must | P0-01 | DONE | 2026-10-26 |  |
 
