@@ -32,12 +32,22 @@ pub const MAX_LABEL_CHARS: usize = 100;
 /// Lowercases and checks a username. Returns the normalized name.
 pub fn normalize_username(input: &str) -> Result<String, FieldError> {
     let name = input.trim().to_ascii_lowercase();
-    let valid_chars = name.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_');
+    let valid_chars = name
+        .bytes()
+        .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_');
     if !(3..=24).contains(&name.len()) || !valid_chars {
-        return Err(FieldError::new("username", "format", "must be 3-24 characters: a-z, 0-9 or _"));
+        return Err(FieldError::new(
+            "username",
+            "format",
+            "must be 3-24 characters: a-z, 0-9 or _",
+        ));
     }
     if RESERVED_USERNAMES.contains(&name.as_str()) || name.starts_with("deleted_") {
-        return Err(FieldError::new("username", "reserved", "this username is not available"));
+        return Err(FieldError::new(
+            "username",
+            "reserved",
+            "this username is not available",
+        ));
     }
     Ok(name)
 }
@@ -49,7 +59,11 @@ pub fn validate_password(password: &str, username: &str) -> Result<(), FieldErro
         return Err(FieldError::new("password", "length", "must be 10-128 characters"));
     }
     if password.to_ascii_lowercase() == username.to_ascii_lowercase() {
-        return Err(FieldError::new("password", "matches_username", "must not equal the username"));
+        return Err(FieldError::new(
+            "password",
+            "matches_username",
+            "must not equal the username",
+        ));
     }
     Ok(())
 }
@@ -63,7 +77,11 @@ pub fn normalize_body(input: &str) -> Result<String, FieldError> {
         .chars()
         .any(|c| (c.is_control() && c != '\n' && c != '\t') || c == '\u{7f}')
     {
-        return Err(FieldError::new("body", "control_character", "must not contain control characters"));
+        return Err(FieldError::new(
+            "body",
+            "control_character",
+            "must not contain control characters",
+        ));
     }
     let trimmed = unix.trim();
     let collapsed = collapse_blank_lines(trimmed);
@@ -93,7 +111,10 @@ fn collapse_blank_lines(text: &str) -> String {
 
 /// Strips control characters, collapses whitespace, and truncates to 300 characters. Returns `None` if nothing is left.
 pub fn sanitize_title(input: &str) -> Option<String> {
-    let cleaned: String = input.chars().map(|c| if c.is_control() { ' ' } else { c }).collect();
+    let cleaned: String = input
+        .chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect();
     let collapsed = cleaned.split_whitespace().collect::<Vec<_>>().join(" ");
     let truncated: String = collapsed.chars().take(MAX_TITLE_CHARS).collect();
     (!truncated.is_empty()).then_some(truncated)
@@ -129,8 +150,14 @@ mod tests {
     fn password_length_and_username_rules() {
         assert!(validate_password("correct horse", "alice").is_ok());
         assert_eq!(validate_password("short", "alice").unwrap_err().code, "length");
-        assert_eq!(validate_password(&"x".repeat(129), "alice").unwrap_err().code, "length");
-        assert_eq!(validate_password("Alice12345", "alice12345").unwrap_err().code, "matches_username");
+        assert_eq!(
+            validate_password(&"x".repeat(129), "alice").unwrap_err().code,
+            "length"
+        );
+        assert_eq!(
+            validate_password("Alice12345", "alice12345").unwrap_err().code,
+            "matches_username"
+        );
     }
 
     #[test]
@@ -144,14 +171,20 @@ mod tests {
 
     #[test]
     fn body_rejects_control_characters_but_keeps_newlines_and_tabs() {
-        assert_eq!(normalize_body("a\u{0007}b").unwrap_err().code, "control_character");
+        assert_eq!(
+            normalize_body("a\u{0007}b").unwrap_err().code,
+            "control_character"
+        );
         assert_eq!(normalize_body("a\tb\nc").unwrap(), "a\tb\nc");
         assert_eq!(normalize_body("a\u{7f}").unwrap_err().code, "control_character");
     }
 
     #[test]
     fn body_normalizes_crlf_collapses_blank_lines_and_trims() {
-        assert_eq!(normalize_body("  a\r\nb\r\n\r\n\r\n\r\nc  ").unwrap(), "a\nb\n\nc");
+        assert_eq!(
+            normalize_body("  a\r\nb\r\n\r\n\r\n\r\nc  ").unwrap(),
+            "a\nb\n\nc"
+        );
     }
 
     #[test]
@@ -167,7 +200,10 @@ mod tests {
 
     #[test]
     fn title_is_collapsed_and_truncated() {
-        assert_eq!(sanitize_title("  Hello\u{0}   world \n").as_deref(), Some("Hello world"));
+        assert_eq!(
+            sanitize_title("  Hello\u{0}   world \n").as_deref(),
+            Some("Hello world")
+        );
         assert_eq!(sanitize_title("   ").as_deref(), None);
         assert_eq!(sanitize_title(&"x".repeat(400)).unwrap().chars().count(), 300);
     }

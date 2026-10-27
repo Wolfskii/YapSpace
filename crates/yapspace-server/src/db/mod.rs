@@ -11,6 +11,7 @@ use tokio_util::sync::CancellationToken;
 
 pub mod audit;
 pub mod credentials;
+pub mod discussions;
 pub mod sessions;
 pub mod users;
 

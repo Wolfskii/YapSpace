@@ -56,7 +56,10 @@ fn all_digits(s: &str) -> bool {
 
 /// YouTube video ids are 11 characters of `[A-Za-z0-9_-]`.
 fn youtube_id(s: &str) -> Option<&str> {
-    (s.len() == 11 && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')).then_some(s)
+    (s.len() == 11
+        && s.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-'))
+    .then_some(s)
 }
 
 struct YouTube;
@@ -103,7 +106,10 @@ impl SiteAdapter for X {
     }
 
     fn matches_host(&self, host: &str) -> bool {
-        matches!(host, "x.com" | "twitter.com" | "mobile.x.com" | "mobile.twitter.com")
+        matches!(
+            host,
+            "x.com" | "twitter.com" | "mobile.x.com" | "mobile.twitter.com"
+        )
     }
 
     fn key(&self, url: &Url) -> Option<AdapterKey> {
@@ -148,7 +154,8 @@ impl SiteAdapter for Reddit {
             }
         };
         let id = raw.to_ascii_lowercase();
-        if !(3..=10).contains(&id.len()) || !id.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit()) {
+        if !(3..=10).contains(&id.len()) || !id.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
+        {
             return None;
         }
         Some(AdapterKey {
@@ -174,7 +181,10 @@ impl SiteAdapter for HackerNews {
         if url.path() != "/item" {
             return None;
         }
-        let id = url.query_pairs().find(|(k, _)| k == "id").map(|(_, v)| v.into_owned())?;
+        let id = url
+            .query_pairs()
+            .find(|(k, _)| k == "id")
+            .map(|(_, v)| v.into_owned())?;
         if !all_digits(&id) {
             return None;
         }
@@ -198,7 +208,11 @@ mod tests {
             "https://m.youtube.com/shorts/dQw4w9WgXcQ",
             "https://www.youtube.com/embed/dQw4w9WgXcQ",
         ] {
-            assert_eq!(adapter_key_for(input).unwrap().value, "video:dQw4w9WgXcQ", "{input}");
+            assert_eq!(
+                adapter_key_for(input).unwrap().value,
+                "video:dQw4w9WgXcQ",
+                "{input}"
+            );
         }
     }
 

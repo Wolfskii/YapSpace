@@ -6,6 +6,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::app::AppState;
 
 pub mod auth;
+pub mod discussions;
 pub mod dto;
 pub mod extractors;
 pub mod health;
@@ -28,4 +29,7 @@ pub fn router() -> OpenApiRouter<AppState> {
         .routes(routes!(me::list_sessions))
         .routes(routes!(me::revoke_session))
         .routes(routes!(users::get_user))
+        .routes(routes!(discussions::resolve))
+        .routes(routes!(discussions::create))
+        .routes(routes!(discussions::get_discussion))
 }

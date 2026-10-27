@@ -1,10 +1,6 @@
 //! `/v1/auth/*`: register, log in, log out, recover (docs/architecture/api.md §F.2).
 
-use axum::{
-    Json,
-    extract::State,
-    http::StatusCode,
-};
+use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
 use utoipa::ToSchema;
 
@@ -77,7 +73,13 @@ pub async fn register(
     State(state): State<AppState>,
     ApiJson(body): ApiJson<RegisterRequest>,
 ) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
-    let issued = service::register(&state, &body.username, &body.password, body.client_label.as_deref()).await?;
+    let issued = service::register(
+        &state,
+        &body.username,
+        &body.password,
+        body.client_label.as_deref(),
+    )
+    .await?;
     Ok((StatusCode::CREATED, Json(auth_response(issued))))
 }
 
@@ -96,7 +98,13 @@ pub async fn login(
     State(state): State<AppState>,
     ApiJson(body): ApiJson<LoginRequest>,
 ) -> Result<Json<AuthResponse>, AppError> {
-    let issued = service::login(&state, &body.username, &body.password, body.client_label.as_deref()).await?;
+    let issued = service::login(
+        &state,
+        &body.username,
+        &body.password,
+        body.client_label.as_deref(),
+    )
+    .await?;
     Ok(Json(auth_response(issued)))
 }
 

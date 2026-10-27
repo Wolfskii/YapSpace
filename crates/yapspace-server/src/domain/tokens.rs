@@ -28,7 +28,10 @@ pub fn new_recovery_code() -> (String, [u8; 32]) {
     let mut raw = [0u8; RECOVERY_LEN];
     rand::fill(&mut raw);
     // 256 is a multiple of 32, so taking each byte modulo 32 is unbiased.
-    let chars: Vec<u8> = raw.iter().map(|b| RECOVERY_ALPHABET[(*b % 32) as usize]).collect();
+    let chars: Vec<u8> = raw
+        .iter()
+        .map(|b| RECOVERY_ALPHABET[(*b % 32) as usize])
+        .collect();
     let code = chars
         .chunks(5)
         .map(|c| std::str::from_utf8(c).expect("ascii alphabet"))
@@ -76,7 +79,11 @@ mod tests {
         let groups: Vec<&str> = code.split('-').collect();
         assert_eq!(groups.len(), 4);
         assert!(groups.iter().all(|g| g.len() == 5));
-        assert!(code.bytes().filter(|b| *b != b'-').all(|b| RECOVERY_ALPHABET.contains(&b)));
+        assert!(
+            code.bytes()
+                .filter(|b| *b != b'-')
+                .all(|b| RECOVERY_ALPHABET.contains(&b))
+        );
         assert_eq!(hash_recovery_code(&code), hash);
     }
 

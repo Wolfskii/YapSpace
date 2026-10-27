@@ -70,7 +70,9 @@ pub struct SessionListResponse {
     )
 )]
 pub async fn get_me(State(state): State<AppState>, user: AuthUser) -> Result<Json<UserDto>, AppError> {
-    let row = users::find_by_id(&state.db, user.user_id).await?.ok_or(AppError::Unauthorized)?;
+    let row = users::find_by_id(&state.db, user.user_id)
+        .await?
+        .ok_or(AppError::Unauthorized)?;
     Ok(Json(user_dto(&row)))
 }
 
@@ -138,7 +140,10 @@ pub async fn rotate_recovery_code(
         (status = 401, description = "Not signed in"),
     )
 )]
-pub async fn list_sessions(State(state): State<AppState>, user: AuthUser) -> Result<Json<SessionListResponse>, AppError> {
+pub async fn list_sessions(
+    State(state): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<SessionListResponse>, AppError> {
     let rows = sessions::list_for_user(&state.db, user.user_id).await?;
     let items = rows
         .into_iter()

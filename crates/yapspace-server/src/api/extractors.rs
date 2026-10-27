@@ -40,7 +40,9 @@ where
 fn map_rejection(rejection: JsonRejection) -> AppError {
     match rejection.status() {
         StatusCode::PAYLOAD_TOO_LARGE => AppError::PayloadTooLarge,
-        StatusCode::UNSUPPORTED_MEDIA_TYPE => AppError::BadRequest("content-type must be application/json".into()),
+        StatusCode::UNSUPPORTED_MEDIA_TYPE => {
+            AppError::BadRequest("content-type must be application/json".into())
+        }
         _ => AppError::BadRequest(rejection.body_text()),
     }
 }

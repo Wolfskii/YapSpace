@@ -37,7 +37,11 @@ pub async fn find(pool: &PgPool, user_id: Uuid) -> Result<Option<CredentialRow>,
     .await
 }
 
-pub async fn update_password(conn: &mut PgConnection, user_id: Uuid, password_hash: &str) -> Result<(), sqlx::Error> {
+pub async fn update_password(
+    conn: &mut PgConnection,
+    user_id: Uuid,
+    password_hash: &str,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE password_credentials SET password_hash = $2, updated_at = now() WHERE user_id = $1",
         user_id,

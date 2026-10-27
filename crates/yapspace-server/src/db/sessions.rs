@@ -43,7 +43,10 @@ pub async fn insert(
     Ok(())
 }
 
-pub async fn find_active_by_token_hash(pool: &PgPool, token_hash: &[u8]) -> Result<Option<AuthRow>, sqlx::Error> {
+pub async fn find_active_by_token_hash(
+    pool: &PgPool,
+    token_hash: &[u8],
+) -> Result<Option<AuthRow>, sqlx::Error> {
     sqlx::query_as!(
         AuthRow,
         r#"SELECT s.id AS session_id, s.user_id, u.username, u.role, u.status, u.suspended_until

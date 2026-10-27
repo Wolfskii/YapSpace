@@ -36,9 +36,9 @@ use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
     api,
-    domain::passwords::PasswordHasher,
     config::{Config, Env},
     db,
+    domain::passwords::PasswordHasher,
     error::AppError,
     telemetry,
 };

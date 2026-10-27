@@ -178,7 +178,8 @@ fn normalize_query(raw: &str) -> Result<String, RejectReason> {
         if value.as_deref().is_some_and(is_secret_like) {
             return Err(RejectReason::SecretLikeToken);
         }
-        if TRACKING_PARAMS.contains(&lower.as_str()) || TRACKING_PREFIXES.iter().any(|p| lower.starts_with(p)) {
+        if TRACKING_PARAMS.contains(&lower.as_str()) || TRACKING_PREFIXES.iter().any(|p| lower.starts_with(p))
+        {
             continue;
         }
         pairs.push((key, value));
@@ -238,7 +239,10 @@ pub fn is_secret_like(value: &str) -> bool {
     if value.len() < SECRET_LIKE_MIN_LEN {
         return false;
     }
-    if !value.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-') {
+    if !value
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+    {
         return false;
     }
     value.bytes().any(|b| b.is_ascii_uppercase())

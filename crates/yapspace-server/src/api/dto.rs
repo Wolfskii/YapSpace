@@ -74,3 +74,50 @@ pub fn public_user_dto(row: &UserRow) -> PublicUserDto {
         created_at: row.created_at,
     }
 }
+
+/// A discussion. `merged_from` is set when the requested id was merged into this discussion.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct DiscussionDto {
+    pub id: Uuid,
+    pub display_url: String,
+    pub site: String,
+    pub title: Option<String>,
+    pub status: String,
+    pub message_count: i32,
+    pub last_seq: i64,
+    #[serde(with = "rfc3339_ms")]
+    #[schema(value_type = String, format = DateTime)]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "rfc3339_ms_opt")]
+    #[schema(value_type = Option<String>, format = DateTime)]
+    pub last_message_at: Option<DateTime<Utc>>,
+    pub merged_from: Option<Uuid>,
+}
+
+/// The identity a page resolved to. This is shown in the panel, so users can check which discussion they are on.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct IdentityDto {
+    /// `url`, `canonical`, or `adapter`.
+    pub kind: String,
+    pub display_url: String,
+    pub site: String,
+    pub ruleset: u16,
+}
+
+pub fn discussion_dto(
+    row: &crate::db::discussions::DiscussionRow,
+    merged_from: Option<Uuid>,
+) -> DiscussionDto {
+    DiscussionDto {
+        id: row.id,
+        display_url: row.display_url.clone(),
+        site: row.site.clone(),
+        title: row.title.clone(),
+        status: row.status.clone(),
+        message_count: row.message_count,
+        last_seq: row.last_seq,
+        created_at: row.created_at,
+        last_message_at: row.last_message_at,
+        merged_from,
+    }
+}

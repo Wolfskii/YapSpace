@@ -45,7 +45,10 @@ fn every_vector_matches_its_expectation() {
         }
         if let Some(display) = expect.get("display_url").and_then(Value::as_str) {
             if list[0].display_url != display {
-                failures.push(format!("{name}: display {:?} != {display:?}", list[0].display_url));
+                failures.push(format!(
+                    "{name}: display {:?} != {display:?}",
+                    list[0].display_url
+                ));
             }
         }
         if let Some(expected) = expect.get("candidates").and_then(Value::as_array) {
@@ -56,5 +59,10 @@ fn every_vector_matches_its_expectation() {
             }
         }
     }
-    assert!(failures.is_empty(), "{} vector(s) failed:\n{}", failures.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} vector(s) failed:\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
 }

@@ -24,10 +24,15 @@ use crate::{
         (status = 404, description = "No such user"),
     )
 )]
-pub async fn get_user(State(state): State<AppState>, Path(username): Path<String>) -> Result<Json<PublicUserDto>, AppError> {
+pub async fn get_user(
+    State(state): State<AppState>,
+    Path(username): Path<String>,
+) -> Result<Json<PublicUserDto>, AppError> {
     let Ok(username) = normalize_username(&username) else {
         return Err(AppError::NotFound);
     };
-    let row = users::find_by_username(&state.db, &username).await?.ok_or(AppError::NotFound)?;
+    let row = users::find_by_username(&state.db, &username)
+        .await?
+        .ok_or(AppError::NotFound)?;
     Ok(Json(public_user_dto(&row)))
 }

@@ -3,9 +3,7 @@
 
 use std::sync::{Arc, OnceLock};
 
-use argon2::{
-    Algorithm, Argon2, Params, PasswordHash, PasswordHasher as _, PasswordVerifier as _, Version,
-};
+use argon2::{Algorithm, Argon2, Params, PasswordHash, PasswordHasher as _, PasswordVerifier as _, Version};
 use tokio::sync::Semaphore;
 
 /// OWASP minimum for Argon2id: m = 19 MiB, t = 2, p = 1.
@@ -54,7 +52,9 @@ impl PasswordHasher {
                 Ok(parsed) => parsed,
                 Err(_) => return Ok(false),
             };
-            Ok(Self::argon2().verify_password(password.as_bytes(), &parsed).is_ok())
+            Ok(Self::argon2()
+                .verify_password(password.as_bytes(), &parsed)
+                .is_ok())
         })
         .await?
     }
@@ -97,15 +97,30 @@ mod tests {
         let hasher = PasswordHasher::new();
         let phc = hasher.hash("correct horse battery".into()).await.unwrap();
         assert!(phc.starts_with("$argon2id$v=19$m=19456,t=2,p=1$"));
-        assert!(hasher.verify("correct horse battery".into(), phc.clone()).await.unwrap());
-        assert!(!hasher.verify("wrong password!!".into(), phc.clone()).await.unwrap());
+        assert!(
+            hasher
+                .verify("correct horse battery".into(), phc.clone())
+                .await
+                .unwrap()
+        );
+        assert!(
+            !hasher
+                .verify("wrong password!!".into(), phc.clone())
+                .await
+                .unwrap()
+        );
         assert!(!PasswordHasher::needs_rehash(&phc));
     }
 
     #[tokio::test]
     async fn malformed_hash_is_a_mismatch_not_an_error() {
         let hasher = PasswordHasher::new();
-        assert!(!hasher.verify("anything".into(), "not-a-phc".into()).await.unwrap());
+        assert!(
+            !hasher
+                .verify("anything".into(), "not-a-phc".into())
+                .await
+                .unwrap()
+        );
         assert!(PasswordHasher::needs_rehash("not-a-phc"));
     }
 
