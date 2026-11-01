@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # Builds the yapspace binary with cargo-chef, so dependency layers are cached between builds.
-FROM rust:1.98-slim-trixie AS chef
+FROM rust:1.99-slim-trixie AS chef
 RUN cargo install cargo-chef --locked
 WORKDIR /app
 
